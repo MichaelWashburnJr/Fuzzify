@@ -32,9 +32,12 @@ Returns:
 """
 def to_absolute(base, source, url):
     try:
-        source = source[:source.index("#")].strip("/")
+        source = source[:source.index("#")]
     except ValueError:
         pass
+
+    source = source.strip("/")
+
     # if URL already absolute, just return it
     if is_absolute(url):
         return url
@@ -43,7 +46,8 @@ def to_absolute(base, source, url):
         return "http://" + base + url
 
     else: # e.g. projects/medialist
-        return source + "/" + url.strip("/")
+        url = url.rstrip("#")
+        return source + "/" + url
 
 """
 Parses the domain name from a URL. If no protocol is specified, it is assumed
@@ -107,3 +111,4 @@ if __name__ == "__main__":
     print(is_absolute(source))
     print(is_absolute("www.google.com"))
     print(to_absolute(base, source, "/medialist"))
+    print(to_absolute('127.0.0.1:4000', 'http://127.0.0.1:4000/shredder/', '/#'))

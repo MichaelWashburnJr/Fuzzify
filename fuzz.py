@@ -1,9 +1,9 @@
-from utils import *
+from utils import get_domain, load_common_words
+from crawl import crawl
 from sys import argv
 from argparse import ArgumentParser
 
 VALID_COMMANDS = ['discover', 'test']
-domain = ""
 
 """ The main function """
 def main():
@@ -44,6 +44,8 @@ def main():
         words=load_common_words(args.common_words)
     extensions = load_common_words("extensions.txt")
 
+    # This is where stuff starts to happen
+    crawl(domain, args.url)
     return
 
 if __name__ == "__main__":
