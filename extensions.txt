@@ -1,3 +1,5 @@
+asp
+aspx
 asx
 asmx
 ashx
