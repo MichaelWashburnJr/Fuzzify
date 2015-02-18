@@ -31,6 +31,10 @@ Returns:
     An absolute URL referring to the given path.
 """
 def to_absolute(base, source, url):
+    try:
+        url = url[:url.index("#")]
+    except ValueError:
+        pass
     # if URL already absolute, just return it
     if is_absolute(url):
         return url
