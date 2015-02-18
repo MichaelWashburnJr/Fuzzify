@@ -3,6 +3,7 @@ from sys import argv
 from argparse import ArgumentParser
 
 VALID_COMMANDS = ['discover', 'test']
+domain = ""
 
 """ The main function """
 def main():
@@ -35,13 +36,15 @@ def main():
     if (args.command.lower() == "test"):
         print("test not implemented yet")
         exit()
-    
 
     words = []
+    domain = get_domain(args.url) # parse the domain name from the given URL
+
     if (args.common_words):
         words=load_common_words(args.common_words)
     extensions = load_common_words("extensions.txt")
-    print(words)
+
+    return
 
 if __name__ == "__main__":
     main()
