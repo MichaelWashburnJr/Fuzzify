@@ -43,7 +43,7 @@ def to_absolute(base, source, url):
         return "http://" + base + url
 
     else: # e.g. projects/medialist
-        return source + "/" + url
+        return source + "/" + url.strip("/")
 
 """
 Parses the domain name from a URL. If no protocol is specified, it is assumed
