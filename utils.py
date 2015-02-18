@@ -32,7 +32,7 @@ Returns:
 """
 def to_absolute(base, source, url):
     try:
-        url = url[:url.index("#")]
+        source = source[:source.index("#")]
     except ValueError:
         pass
     # if URL already absolute, just return it
