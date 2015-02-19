@@ -36,6 +36,11 @@ def to_absolute(base, source, url):
     except ValueError:
         pass
 
+    try:
+        source = source[:source.index("?")]
+    except ValueError:
+        pass
+
     source = source.strip("/")
 
     # if URL already absolute, just return it
