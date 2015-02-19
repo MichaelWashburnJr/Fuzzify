@@ -1,3 +1,74 @@
+global debug_flag
+debug_flag = False
+
+class Url():
+    def __init__(self, url, source="", domain=""):
+        #TODO implement better logic
+        if '#' in url: #chop off anchors
+            url = url[:url.index("#")]
+        debug("URL: %s" % url)
+        debug("Source: %s" % source)
+        debug("Domain: %s" % domain)
+        self.url = to_absolute(domain, source, url)
+        debug("Absolute URL: %s" % self.url)
+        self.domain = get_domain(self.url) # Cover all cases
+        debug("Interpreted domain: %s" % self.domain)
+        # Now, we need the parts of the URL after the domain.
+        # The domain IS a part of the URL at this point, guaranteed.
+        d = self.domain # alias
+        debug("Constructing URL. domain: %s" % d)
+        path = self.url[self.url.index(d) + len(d):]
+        debug("Path: %s" % path)
+        path = path.strip("/")
+        debug("Stripped to: %s" % path)
+        parts = path.split("/")
+        debug("Split to %r" % parts)
+        canonical_parts = []
+        self.inputs = []
+        debug("Iterating through parts")
+        for part in parts:
+            if (part == ""):
+                continue
+            debug("Found part: %s" % part)
+
+            if ('?' in part):
+                self.inputs += parse_query_string(part.split('?')[1])
+                debug("Inputs: %s " % self.inputs)
+                part = part.split("?")[0]
+
+            if (part == ".."): # Need to remove the previous part
+                if (len(parts) is not 0):
+                    debug("Found '..', removing %s" % canonical_parts.pop())
+            else:
+                canonical_parts.append(part)
+        debug("Final parts: %r" % canonical_parts)
+        
+
+        final_url = "http://" + self.domain + "/"
+        for p in canonical_parts:
+            final_url += p + "/"
+        debug("Final URL: %s" % final_url)
+        self.url = final_url
+
+    def get_absolute(self):
+        return self.url
+
+    def __str__(self):
+        return self.get_absolute()
+
+def debug(text):
+    global debug_flag
+    if debug_flag:
+        print(text)
+
+def parse_query_string(string):
+    inputs = []
+    parts = string.split("&")
+    for part in parts:
+        input_field = part.split("=")[0]
+        inputs.append(input_field)
+    return inputs
+
 """
 Reads in each line from a text file and returns a list of the words found.
 params:
@@ -113,7 +184,15 @@ def filter_externals(base, urls):
 if __name__ == "__main__":
     base = "corb.co"
     source = "http://corb.co/projects"
-    print(is_absolute(source))
-    print(is_absolute("www.google.com"))
-    print(to_absolute(base, source, "/medialist"))
-    print(to_absolute('127.0.0.1:4000', 'http://127.0.0.1:4000/shredder/', '/#'))
+    urls = [
+        "test/",
+        "/test/",
+        "http://corb.co",
+        "http://corb.co/asdf/../test?argument=banana&test=false#tagsgoherewoo",
+        "test?test",
+        "test?test=",
+        "////////test?test",
+        "http://google.com/intl/en/policies/terms/../../policies/terms/../../policies/technologies/location-data/../../../policies/faq/../../policies/terms/../../policies/privacy/../../policies/privacy/key-terms/../../../policies/technologies/voice/../../../policies/technologies/../../policies/technologies/../../policies/technologies/ads/../../../policies/privacy/../../policies/privacy/example/wifi-access-points-and-cell-towers.html/../../../policies/privacy/archive/"
+    ]
+    for url in urls:
+        print(str(Url(url, source, base)))
