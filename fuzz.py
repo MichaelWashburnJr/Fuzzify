@@ -1,7 +1,11 @@
-from utils import get_domain, load_common_words
-from crawl import crawl
-from sys import argv
-from argparse import ArgumentParser
+import module_check
+
+#do all imports if the required packages were found
+if module_check.all_found:
+    from utils import get_domain, load_common_words
+    from crawl import crawl
+    from sys import argv
+    from argparse import ArgumentParser
 
 VALID_COMMANDS = ['discover', 'test']
 
@@ -48,5 +52,5 @@ def main():
     crawl(domain, args.url)
     return
 
-if __name__ == "__main__":
+if __name__ == "__main__" and module_check.all_found:
     main()
