@@ -36,7 +36,7 @@ def auth_BodgeIt(session):
     password = "password"
 
     # Create the user. This will fail gracefully if already created.
-    r = session.post("http://127.0.0.1:8080/bodgeit/register.jsp?",
+    session.post("http://127.0.0.1:8080/bodgeit/register.jsp?",
         data={
             "username"  : username,
             "password1" : password,
@@ -44,7 +44,7 @@ def auth_BodgeIt(session):
         })
 
     # Force a login of the user. This will fail gracefully if already logged in.
-    r = session.post("http://127.0.0.1:8080/bodgeit/login.jsp?",
+    session.post("http://127.0.0.1:8080/bodgeit/login.jsp?",
         data={
             "username" : username,
             "password" : password
