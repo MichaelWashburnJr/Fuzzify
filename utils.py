@@ -43,6 +43,7 @@ class Url():
                 self.inputs += parse_query_string(part.split('?')[1])
                 debug("Inputs: %s " % self.inputs)
                 part = part.split("?")[0]
+                canonical_parts.append(part)
 
             elif (part == ".."): # Need to remove the previous part
                 if (len(canonical_parts) is not 0):
