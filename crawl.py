@@ -41,16 +41,16 @@ def crawl(domain, url):
     session = requests.Session()
 
     #provided authentication for dvwa
-    if "/dvwa" in url:
+    if "/dvwa" in url.url:
         session = auth_DVWA(session)
-    elif "/bodgeit" in url:
+    elif "/bodgeit" in url.url:
         pass#TODO provide auth for bodgeit
 
     recurse_crawl(session, domain, url)
     
     print("\n\n\nLink List (sorted):")
-    for url in sorted(good_links):
-        print(url);
+    for url in sorted(good_links, key=lambda u: u.url):
+        print(url.url);
 
     print("\n\n\nCookie List:")
     for cookie in cookies:
@@ -67,10 +67,10 @@ def recurse_crawl(session, domain, url):
     global cookies
     global inputs
 
-    print("Crawling: " + url)
+    print("Crawling: " + str(url))
     links = set()
     try:
-        r = session.get(url)
+        r = session.get(url.url)
     except requests.exceptions.ConnectionError:
         print("ConnectionError")
         return links
@@ -93,7 +93,7 @@ def recurse_crawl(session, domain, url):
     for link in beautiful.find_all('a'):
         linkContent = link.get('href')
         if linkContent is not None:
-            links.add(to_absolute(domain, url, linkContent))
+            links.add(Url(linkContent, source=url.url, domain=url.domain))
     links = filter_externals(domain, links)
     for link in links:
         if link not in visited:

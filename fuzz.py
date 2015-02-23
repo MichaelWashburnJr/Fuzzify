@@ -1,4 +1,5 @@
 import module_check
+from utils import Url
 
 #do all imports if the required packages were found
 if module_check.all_found:
@@ -42,14 +43,15 @@ def main():
         exit()
 
     words = []
-    domain = get_domain(args.url) # parse the domain name from the given URL
+    url = Url(args.url)
+    domain = url.domain # parse the domain name from the given URL
 
     if (args.common_words):
         words=load_common_words(args.common_words)
     extensions = load_common_words("extensions.txt")
 
     # This is where stuff starts to happen
-    crawl(domain, args.url)
+    crawl(domain, url)
     return
 
 if __name__ == "__main__" and module_check.all_found:

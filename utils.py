@@ -2,10 +2,18 @@ global debug_flag
 debug_flag = False
 
 class Url():
+    __slots__ = ('domain', 'url', 'inputs')
+
     def __init__(self, url, source="", domain=""):
         #TODO implement better logic
         if '#' in url: #chop off anchors
             url = url[:url.index("#")]
+        # If URL empty string, make things a little easier
+        if (url == "" or url.startswith("mailto:") or url.startswith("javascript:")):
+            self.url = source
+            self.domain = domain
+            self.inputs = []
+            return
         debug("URL: %s" % url)
         debug("Source: %s" % source)
         debug("Domain: %s" % domain)
@@ -36,9 +44,13 @@ class Url():
                 debug("Inputs: %s " % self.inputs)
                 part = part.split("?")[0]
 
-            if (part == ".."): # Need to remove the previous part
-                if (len(parts) is not 0):
+            elif (part == ".."): # Need to remove the previous part
+                if (len(canonical_parts) is not 0):
                     debug("Found '..', removing %s" % canonical_parts.pop())
+
+            elif (part == "."):
+                pass
+
             else:
                 canonical_parts.append(part)
         debug("Final parts: %r" % canonical_parts)
@@ -55,6 +67,12 @@ class Url():
 
     def __str__(self):
         return self.get_absolute()
+
+    def __eq__(self, other):
+        return self.get_absolute() == other.get_absolute()
+
+    def __hash__(self):
+        return hash(self.get_absolute())
 
 def debug(text):
     global debug_flag
@@ -176,7 +194,7 @@ returns
 def filter_externals(base, urls):
     filtered_urls = []
     for url in urls:
-        if domain_matches(base, url):
+        if domain_matches(base, str(url)):
             filtered_urls.append(url)
     return filtered_urls
 
