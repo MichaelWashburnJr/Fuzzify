@@ -77,6 +77,10 @@ def crawl(domain, url):
     print("\n\n\nLink List (sorted):")
     for url in sorted(good_links, key=lambda u: u.url):
         print(url.url);
+        if len(url.inputs) > 0:
+            print("    Variable(s) found:")
+            for input_variable in url.inputs:
+                print("      - " + input_variable)
 
     print("\n\n\nCookie List:")
     for cookie in cookies:
