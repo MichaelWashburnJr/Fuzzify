@@ -25,7 +25,6 @@ phtml
 py
 rb
 rhtml
-XML
 xml
 rss
 svg
