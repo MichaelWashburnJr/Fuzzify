@@ -47,11 +47,19 @@ def main():
     domain = url.domain # parse the domain name from the given URL
 
     if (args.common_words):
-        words=load_common_words(args.common_words)
+        words = load_common_words(args.common_words)
     extensions = load_common_words("extensions.txt")
 
     # This is where stuff starts to happen
-    crawl(domain, url)
+
+    # Build the page guessing Urls.
+    guessed_urls = []
+    for word in words:
+        for extension in extensions:
+            guessed_urls.append(Url(url.url + '/' + word + '.' + extension))
+
+    crawl(domain, url, guessed_urls)
+
     return
 
 if __name__ == "__main__" and module_check.all_found:

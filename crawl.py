@@ -54,7 +54,7 @@ def auth_BodgeIt(session):
 
     return session
 
-def crawl(domain, url):
+def crawl(domain, url, guessed_urls):
     global visited
     global good_links
     global cookies
@@ -73,6 +73,11 @@ def crawl(domain, url):
         session = auth_BodgeIt(session)
 
     recurse_crawl(session, domain, url)
+
+    # Guess URLs.
+    print("\nTesting guessed URLs...\n")
+    for url_to_test in guessed_urls:
+        recurse_crawl(session, domain, url_to_test)
     
     print("\n\n\nLink List (sorted):")
     for url in sorted(good_links, key=lambda u: u.url):
@@ -102,10 +107,10 @@ def recurse_crawl(session, domain, url):
     try:
         r = session.get(url.url)
     except requests.exceptions.ConnectionError:
-        print("ConnectionError")
+        print("  ConnectionError")
         return links
     if r.status_code != 200:
-        print("Status code: " + str(r.status_code))
+        print("  Status code: " + str(r.status_code))
         return links
 
     good_links.add(url)
