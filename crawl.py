@@ -28,6 +28,25 @@ def auth_DVWA(session):
         })
     return session
 
+"""
+Create a user and authorize a session on the BodgeIt website
+"""
+def auth_BodgeIt(session):
+    username = "test@test.test"
+    password = "password"
+
+    # Create the user. This will fail if already created, but the auth /should/ still work.
+    r = session.post("http://127.0.0.1:8080/bodgeit/register.jsp?",
+        data={
+            "username"  : username,
+            "password1" : password,
+            "password2" : password
+        })
+
+    session.auth = (username, password)
+
+    return session
+
 def crawl(domain, url):
     global visited
     global good_links
@@ -44,7 +63,7 @@ def crawl(domain, url):
     if "/dvwa" in url.url:
         session = auth_DVWA(session)
     elif "/bodgeit" in url.url:
-        pass#TODO provide auth for bodgeit
+        session = auth_BodgeIt(session)
 
     recurse_crawl(session, domain, url)
     
