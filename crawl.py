@@ -16,6 +16,17 @@ class InputField:
     def __str__(self):
         return "InputField { name:%s id:%s type:%s from_url:%s }" % (self.name, self.id, self.type, self.from_url)
 
+"""
+Authorize a session on the DVWA website
+"""
+def auth_DVWA(session):
+    r = session.post("http://127.0.0.1/dvwa/login.php?",
+        data={
+            "username" : "admin",
+            "password" : "password",
+            "Login"    : "Login"
+        })
+    return session
 
 def crawl(domain, url):
     global visited
@@ -27,8 +38,15 @@ def crawl(domain, url):
     good_links = set()
     cookies = set()
     inputs = set()
+    session = requests.Session()
 
-    recurse_crawl(domain, url)
+    #provided authentication for dvwa
+    if "/dvwa" in url:
+        session = auth_DVWA(session)
+    elif "/bodgeit" in url:
+        pass#TODO provide auth for bodgeit
+
+    recurse_crawl(session, domain, url)
     
     print("\n\n\nLink List (sorted):")
     for url in sorted(good_links):
@@ -43,7 +61,7 @@ def crawl(domain, url):
         print(input_item);
 
 
-def recurse_crawl(domain, url):
+def recurse_crawl(session, domain, url):
     global visited
     global good_links
     global cookies
@@ -52,7 +70,7 @@ def recurse_crawl(domain, url):
     print("Crawling: " + url)
     links = set()
     try:
-        r = requests.get(url)
+        r = session.get(url)
     except requests.exceptions.ConnectionError:
         print("ConnectionError")
         return links
@@ -80,4 +98,4 @@ def recurse_crawl(domain, url):
     for link in links:
         if link not in visited:
             visited.add(link)
-            recurse_crawl(domain, link)
+            recurse_crawl(session, domain, link)
