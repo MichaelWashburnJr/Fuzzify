@@ -4,7 +4,6 @@ from utils import *
 
 global visited
 global good_links
-global inputs
 
 class InputField:
     def __init__(self, field_element, url):
@@ -56,11 +55,9 @@ def auth_BodgeIt(session):
 def crawl(domain, url, guessed_urls, custom_auth):
     global visited
     global good_links
-    global inputs
 
     visited = set()
     good_links = set()
-    inputs = set()
     session = requests.Session()
 
     #provided authentication for dvwa
@@ -83,14 +80,14 @@ def crawl(domain, url, guessed_urls, custom_auth):
             print("    Variable(s) found:")
             for input_variable in url.inputs:
                 print("      - " + input_variable)
+        if len(url.input_fields) > 0:
+            print("    inputs found:")
+            for input_variable in url.input_fields:
+                print(str(input_variable))
 
     print("\n\n\nSession Cookie List:")
     for cookie in session.cookies:
         print(cookie);
-
-    print("\n\n\nInput List:")
-    for input_item in inputs:
-        print(input_item);
 
 def update_inputs(url_set, url):
     for u1 in url_set:
@@ -102,7 +99,6 @@ def update_inputs(url_set, url):
 def recurse_crawl(session, domain, url):
     global visited
     global good_links
-    global inputs
 
     print("Crawling: " + str(url))
     links = []
@@ -121,7 +117,7 @@ def recurse_crawl(session, domain, url):
 
     # Find all inputs
     for input_field in beautiful.find_all('input'):
-        inputs.add(InputField(input_field, url))
+        url.input_fields.add(InputField(input_field, url))
 
     # Find all links
     for link in beautiful.find_all('a'):
