@@ -14,7 +14,7 @@ class InputField:
         self.type = field_element.get('type')
         self.from_url = url
     def __str__(self):
-        return "InputField { name:%s id:%s type:%s from_url:%s }" % (self.name, self.id, self.type, self.from_url)
+        return "InputField { \n  name:%s id:%s type:%s \n  from_url:%s \n}" % (self.name, self.id, self.type, self.from_url)
 
 """
 Authorize a session on the DVWA website
