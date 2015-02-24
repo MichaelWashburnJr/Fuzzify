@@ -12,7 +12,7 @@ def TryModule(module_name, print_name, pip_name):
         return False
 
 """ Check for required packages"""
-all_found = True;
+all_found = True
 all_found &= TryModule("requests", "Requests", "requests")
 all_found &= TryModule("bs4", "BeautifulSoup4", "BeautifulSoup4")#BeautifulSoup4
 

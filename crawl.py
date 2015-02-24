@@ -4,6 +4,8 @@ from url import Url, filter_externals
 
 global visited
 global good_links
+global session
+global custom_auth
 
 class InputField:
     def __init__(self, field_element, url):
@@ -12,7 +14,18 @@ class InputField:
         self.type = field_element.get('type')
         self.from_url = url
     def __str__(self):
-        return "name: {!s:<15} id: {!s:<15} type: {!s:<15}".format(self.name, self.id, self.type)
+        return "name: {!s:<17} id: {!s:<17} type: {!s:<15}".format(self.name, self.id, self.type)
+
+
+def perform_auth():
+    global session
+    global custom_auth
+
+    # If custom_auth was used, set up the session.
+    if custom_auth == "dvwa":
+        session = auth_DVWA(session)
+    elif custom_auth == "bodgeit":
+        session = auth_BodgeIt(session)
 
 """
 Authorize a session on the DVWA website
@@ -52,33 +65,33 @@ def auth_BodgeIt(session):
 
     return session
 
-def crawl(domain, url, guessed_urls, custom_auth):
+
+def crawl(domain, url, guessed_urls, in_custom_auth):
     global visited
     global good_links
+    global session
+    global custom_auth
 
     visited = set()
     good_links = set()
     session = requests.Session()
+    custom_auth = in_custom_auth
 
-    # If custom_auth was used, set up the session.
-    if custom_auth == "dvwa":
-        session = auth_DVWA(session)
-    elif custom_auth == "bodgeit":
-        session = auth_BodgeIt(session)
+    perform_auth()
 
-    recurse_crawl(session, domain, url)
+    recurse_crawl(domain, url)
 
     # Guess URLs.
     print("\nTesting guessed URLs...\n")
     for url_to_test in guessed_urls:
-        recurse_crawl(session, domain, url_to_test)
+        recurse_crawl(domain, url_to_test)
     
 
     print("\n\n\n{:=^76}\n".format(" OUTPUT "))
 
     print("\nPages found:")
     for url in sorted(good_links, key=lambda u: u.url):
-        print(url.url);
+        print(url.url)
         if len(url.inputs) > 0:
             print("    Variable(s) found:")
             for input_variable in url.inputs:
@@ -90,7 +103,7 @@ def crawl(domain, url, guessed_urls, custom_auth):
 
     print("\n\nSession Cookie List:")
     for cookie in session.cookies:
-        print(cookie);
+        print("  " + str(cookie))
 
 def update_inputs(url_set, url):
     for u1 in url_set:
@@ -99,9 +112,10 @@ def update_inputs(url_set, url):
                 if inp not in u1.inputs:
                     u1.inputs.append(inp)
 
-def recurse_crawl(session, domain, url):
+def recurse_crawl(domain, url):
     global visited
     global good_links
+    global session
 
     print("Crawling: " + str(url))
     links = []
@@ -112,6 +126,17 @@ def recurse_crawl(session, domain, url):
         return links
     if r.status_code != 200:
         print("  Status code: " + str(r.status_code))
+        if r.status_code == 403:
+            print("  Attempting re-auth...")
+            perform_auth()
+            try:
+                r = session.get(url.url)
+            except requests.exceptions.ConnectionError:
+                print("    ConnectionError")
+                return links
+            if r.status_code != 200:
+                print("    Status code: " + str(r.status_code))
+                return links
         return links
 
     good_links.add(url)
@@ -131,6 +156,6 @@ def recurse_crawl(session, domain, url):
     for link in links:
         if link not in visited:
             visited.add(link)
-            recurse_crawl(session, domain, link)
+            recurse_crawl(domain, link)
         else:
             update_inputs(good_links, link)
