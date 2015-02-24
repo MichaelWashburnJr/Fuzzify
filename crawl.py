@@ -81,9 +81,9 @@ def crawl(domain, url, guessed_urls, custom_auth):
             for input_variable in url.inputs:
                 print("      - " + input_variable)
         if len(url.input_fields) > 0:
-            print("    inputs found:")
+            print("    Input field(s) found:")
             for input_variable in url.input_fields:
-                print(str(input_variable))
+                print("      - " + str(input_variable))
 
     print("\n\n\nSession Cookie List:")
     for cookie in session.cookies:
