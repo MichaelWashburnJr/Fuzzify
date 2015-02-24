@@ -2,9 +2,10 @@ global debug_flag
 debug_flag = False
 
 class Url():
-    __slots__ = ('domain', 'url', 'inputs')
+    __slots__ = ('domain', 'url', 'inputs', 'input_fields')
 
     def __init__(self, url, source="", domain=""):
+        self.input_fields = set()
         if '#' in url: #chop off anchors
             url = url[:url.index("#")]
         # If URL empty string, make things a little easier
