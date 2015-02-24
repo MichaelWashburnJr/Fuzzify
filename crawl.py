@@ -1,6 +1,6 @@
 import requests
 from bs4 import BeautifulSoup as bs
-from utils import *
+from url import Url, filter_externals
 
 global visited
 global good_links

@@ -1,9 +1,9 @@
 import module_check
-from utils import Url
 
 #do all imports if the required packages were found
 if module_check.all_found:
-    from utils import get_domain, load_common_words
+    from url import Url
+    from utils import load_common_words
     from crawl import crawl
     from sys import argv
     from argparse import ArgumentParser
