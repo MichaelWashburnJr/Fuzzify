@@ -29,7 +29,7 @@ def main():
         help=command_desc)
     parser.add_argument('url', metavar='url', type=str,
         help=url_desc)
-    parser.add_argument('--common-words', metavar='file', help=common_desc)
+    parser.add_argument('--common-words', metavar='file', help=common_desc, required=True)
     parser.add_argument('--custom-auth', metavar='string', help=auth_desc)
 
     # parse the arguments
@@ -56,10 +56,7 @@ def main():
 
     if (args.common_words):
         words = load_common_words(args.common_words)
-    else:
-        print("Error: common-words file required")
-        parser.print_help()
-        exit()
+
     extensions = load_common_words("extensions.txt")
 
     # This is where stuff starts to happen
