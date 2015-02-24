@@ -22,6 +22,7 @@ def main():
     url_desc = "The URL of the website to discover or test"
     common_desc = ("(discover only) Text file containing a list of common " +
         "words to try when searching for pages")
+    auth_desc = "[ dvwa / bodgeit ] The custom authentication method to use"
 
     # add command line arguments to the parser
     parser.add_argument('command', metavar='command', type=str,
@@ -29,6 +30,7 @@ def main():
     parser.add_argument('url', metavar='url', type=str,
         help=url_desc)
     parser.add_argument('--common-words', metavar='file', help=common_desc)
+    parser.add_argument('--custom-auth', metavar='string', help=auth_desc)
 
     # parse the arguments
     args = parser.parse_args()
@@ -41,6 +43,12 @@ def main():
     if (args.command.lower() == "test"):
         print("test not implemented yet")
         exit()
+
+    #validate custom auth arg
+    auth = ""
+    valid_custom_auth = ["dvwa", "bodgeit"]
+    if (args.custom_auth and args.custom_auth.lower() in valid_custom_auth):
+        auth = args.custom_auth.lower()
 
     words = []
     url = Url(args.url)
@@ -58,7 +66,7 @@ def main():
         for extension in extensions:
             guessed_urls.append(Url(url.url + '/' + word + '.' + extension))
 
-    crawl(domain, url, guessed_urls)
+    crawl(domain, url, guessed_urls, auth)
 
     return
 

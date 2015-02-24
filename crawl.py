@@ -54,7 +54,7 @@ def auth_BodgeIt(session):
 
     return session
 
-def crawl(domain, url, guessed_urls):
+def crawl(domain, url, guessed_urls, custom_auth):
     global visited
     global good_links
     global cookies
@@ -67,9 +67,9 @@ def crawl(domain, url, guessed_urls):
     session = requests.Session()
 
     #provided authentication for dvwa
-    if "/dvwa" in url.url:
+    if custom_auth == "dvwa":
         session = auth_DVWA(session)
-    elif "/bodgeit" in url.url:
+    elif custom_auth == "bodgeit":
         session = auth_BodgeIt(session)
 
     recurse_crawl(session, domain, url)
