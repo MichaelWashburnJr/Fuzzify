@@ -134,7 +134,7 @@ def recurse_crawl(session, domain, url):
     for link in beautiful.find_all('a'):
         linkContent = link.get('href')
         if linkContent is not None:
-            links.add(Url(linkContent, source=url.url, domain=url.domain))
+            links.add(Url(linkContent, source=r.url, domain=url.domain))
     links = filter_externals(domain, links)
     for link in links:
         if link not in visited:
