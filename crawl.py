@@ -95,6 +95,12 @@ def crawl(domain, url, guessed_urls):
     for input_item in inputs:
         print(input_item);
 
+def update_inputs(url_set, url):
+    for u1 in url_set:
+        if (u1.get_absolute() == url.get_absolute()):
+            for inp in url.inputs:
+                if inp not in u1.inputs:
+                    u1.inputs.append(inp)
 
 def recurse_crawl(session, domain, url):
     global visited
@@ -134,3 +140,5 @@ def recurse_crawl(session, domain, url):
         if link not in visited:
             visited.add(link)
             recurse_crawl(session, domain, link)
+        else:
+            update_inputs(visited, link)
