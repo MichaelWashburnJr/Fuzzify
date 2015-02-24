@@ -15,7 +15,7 @@ Usage:
 Discover
 --------
 To use the Fuzzer's discover functionality, issue the command
-`python fuzz.py discover http://url.to/fuzzify`
+`python fuzz.py discover http://url.to/fuzzify --common-words=file.txt`
 
 Help:
 -----
