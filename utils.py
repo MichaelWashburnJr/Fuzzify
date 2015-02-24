@@ -56,9 +56,9 @@ class Url():
         debug("Final parts: %r" % canonical_parts)
         
 
-        final_url = "http://" + self.domain + "/"
+        final_url = "http://" + self.domain
         for p in canonical_parts:
-            final_url += p + "/"
+            final_url += "/" + p
         debug("Final URL: %s" % final_url)
         self.url = final_url
 
