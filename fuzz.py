@@ -56,6 +56,10 @@ def main():
 
     if (args.common_words):
         words = load_common_words(args.common_words)
+    else:
+        print("Error: common-words file required")
+        parser.print_help()
+        exit()
     extensions = load_common_words("extensions.txt")
 
     # This is where stuff starts to happen
