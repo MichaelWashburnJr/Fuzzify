@@ -63,7 +63,7 @@ def crawl(domain, url, guessed_urls, custom_auth):
     inputs = set()
     session = requests.Session()
 
-    #provided authentication for dvwa
+    # If custom_auth was used, set up the session.
     if custom_auth == "dvwa":
         session = auth_DVWA(session)
     elif custom_auth == "bodgeit":
