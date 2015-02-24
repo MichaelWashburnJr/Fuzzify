@@ -134,4 +134,4 @@ def recurse_crawl(session, domain, url):
             visited.add(link)
             recurse_crawl(session, domain, link)
         else:
-            update_inputs(visited, link)
+            update_inputs(good_links, link)
