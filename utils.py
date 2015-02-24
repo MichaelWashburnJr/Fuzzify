@@ -5,7 +5,6 @@ class Url():
     __slots__ = ('domain', 'url', 'inputs')
 
     def __init__(self, url, source="", domain=""):
-        #TODO implement better logic
         if '#' in url: #chop off anchors
             url = url[:url.index("#")]
         # If URL empty string, make things a little easier
@@ -131,7 +130,14 @@ def to_absolute(base, source, url):
     except ValueError:
         pass
 
-    source = source.strip("/")
+    if '/' in source:
+        # Use everything up to and including the last slash as the base
+        # reverse the source
+        new_source = source[::-1]
+        # Grab everything from the first slash on
+        new_source = new_source[new_source.index('/'):]
+        # reverse it again
+        source = new_source[::-1]
 
     # if URL already absolute, just return it
     if is_absolute(url):
