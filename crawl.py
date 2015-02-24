@@ -12,7 +12,7 @@ class InputField:
         self.type = field_element.get('type')
         self.from_url = url
     def __str__(self):
-        return "InputField { \n  name:%s id:%s type:%s \n  from_url:%s \n}" % (self.name, self.id, self.type, self.from_url)
+        return "name: {!s:<15} id: {!s:<15} type: {!s:<15}".format(self.name, self.id, self.type)
 
 """
 Authorize a session on the DVWA website
@@ -73,7 +73,10 @@ def crawl(domain, url, guessed_urls, custom_auth):
     for url_to_test in guessed_urls:
         recurse_crawl(session, domain, url_to_test)
     
-    print("\n\n\nLink List (sorted):")
+
+    print("\n\n\n{:=^76}\n".format(" OUTPUT "))
+
+    print("\nPages found:")
     for url in sorted(good_links, key=lambda u: u.url):
         print(url.url);
         if len(url.inputs) > 0:
@@ -85,7 +88,7 @@ def crawl(domain, url, guessed_urls, custom_auth):
             for input_variable in url.input_fields:
                 print("      - " + str(input_variable))
 
-    print("\n\n\nSession Cookie List:")
+    print("\n\nSession Cookie List:")
     for cookie in session.cookies:
         print(cookie);
 
