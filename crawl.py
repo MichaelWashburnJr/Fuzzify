@@ -4,7 +4,6 @@ from utils import *
 
 global visited
 global good_links
-global cookies
 global inputs
 
 class InputField:
@@ -57,12 +56,10 @@ def auth_BodgeIt(session):
 def crawl(domain, url, guessed_urls, custom_auth):
     global visited
     global good_links
-    global cookies
     global inputs
 
     visited = set()
     good_links = set()
-    cookies = set()
     inputs = set()
     session = requests.Session()
 
@@ -87,8 +84,8 @@ def crawl(domain, url, guessed_urls, custom_auth):
             for input_variable in url.inputs:
                 print("      - " + input_variable)
 
-    print("\n\n\nCookie List:")
-    for cookie in cookies:
+    print("\n\n\nSession Cookie List:")
+    for cookie in session.cookies:
         print(cookie);
 
     print("\n\n\nInput List:")
@@ -105,7 +102,6 @@ def update_inputs(url_set, url):
 def recurse_crawl(session, domain, url):
     global visited
     global good_links
-    global cookies
     global inputs
 
     print("Crawling: " + str(url))
@@ -120,9 +116,6 @@ def recurse_crawl(session, domain, url):
         return links
 
     good_links.add(url)
-    for cookie in r.cookies:
-        if cookie not in cookies:
-            cookies.add(cookie)
 
     beautiful = bs(r.content)
 
