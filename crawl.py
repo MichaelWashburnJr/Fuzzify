@@ -7,16 +7,6 @@ global good_links
 global session
 global custom_auth
 
-class InputField:
-    def __init__(self, field_element, url):
-        self.name = field_element.get('name')
-        self.id = field_element.get('id')
-        self.type = field_element.get('type')
-        self.from_url = url
-    def __str__(self):
-        return "name: {!s:<17} id: {!s:<17} type: {!s:<15}".format(self.name, self.id, self.type)
-
-
 def perform_auth():
     global session
     global custom_auth
@@ -92,9 +82,9 @@ def crawl(domain, url, guessed_urls, in_custom_auth):
     print("\nPages found:")
     for url in sorted(good_links, key=lambda u: u.url):
         print(url.url)
-        if len(url.inputs) > 0:
+        if len(url.params) > 0:
             print("    Variable(s) found:")
-            for input_variable in url.inputs:
+            for input_variable in url.params:
                 print("      - " + input_variable)
         if len(url.input_fields) > 0:
             print("    Input field(s) found:")
@@ -105,12 +95,12 @@ def crawl(domain, url, guessed_urls, in_custom_auth):
     for cookie in session.cookies:
         print("  " + str(cookie))
 
-def update_inputs(url_set, url):
+def update_params(url_set, url):
     for u1 in url_set:
         if (u1.get_absolute() == url.get_absolute()):
-            for inp in url.inputs:
-                if inp not in u1.inputs:
-                    u1.inputs.append(inp)
+            for inp in url.params:
+                if inp not in u1.params:
+                    u1.params.append(inp)
 
 def recurse_crawl(domain, url):
     global visited
@@ -143,7 +133,7 @@ def recurse_crawl(domain, url):
 
     beautiful = bs(r.content)
 
-    # Find all inputs
+    # Find all input fields
     for input_field in beautiful.find_all('input'):
         url.input_fields.add(InputField(input_field, url))
 
@@ -158,4 +148,4 @@ def recurse_crawl(domain, url):
             visited.add(link)
             recurse_crawl(domain, link)
         else:
-            update_inputs(good_links, link)
+            update_params(good_links, link)
