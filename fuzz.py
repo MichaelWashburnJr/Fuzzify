@@ -31,6 +31,8 @@ def main():
         help=url_desc)
     parser.add_argument('--common-words', metavar='file', help=common_desc, required=True)
     parser.add_argument('--custom-auth', metavar='string', help=auth_desc)
+    parser.add_argument('--vectors', metavar='vectors', help='the vectors')
+    parser.add_argument('--sensitive', metavar='sensitive', help='sensitive stuff')
 
     # parse the arguments
     args = parser.parse_args()
