@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup as bs
 from url import Url, filter_externals
+from page import Page
 
 global visited
 global good_links
@@ -149,3 +150,7 @@ def recurse_crawl(domain, url):
             recurse_crawl(domain, link)
         else:
             update_params(good_links, link)
+
+    for link in links:
+        if PageSet.create_or_update_page_by_url(link):
+            recurse_crawl(link)
