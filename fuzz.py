@@ -26,6 +26,11 @@ def main():
     vect_desc = "A file containing common strings used to exploit web pages"
     sens_desc = ("A file containing data that is determined to be \"sensitive"+
         "\", i.e. users should not see it")
+    rand_desc = ("When off, try each input to each page systematically."+
+        " When on, choose a random page, then a random input field and test"+
+        " all vectors. Default: false.")
+    slow_desc = ("Number of milliseconds considered when a response is cons"+
+        "idered \"slow\". Default is 500 milliseconds")
 
 
     # add command line arguments to the parser
@@ -37,6 +42,8 @@ def main():
     parser.add_argument('--custom-auth', metavar='string', help=auth_desc)
     parser.add_argument('--vectors', metavar='<file>', help=vect_desc)
     parser.add_argument('--sensitive', metavar='<file>', help=sens_desc)
+    parser.add_argument('--random', metavar='[true/false]', help=rand_desc)
+    parser.add_argument('--slow', metavar='<ms>', help=slow_desc)
 
     # parse the arguments
     args = parser.parse_args()
