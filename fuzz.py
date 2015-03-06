@@ -17,22 +17,26 @@ def main():
         description="Discover vulnerabilities for web applications"
     )
     # define 'help' strings up here to be cleaner
-    command_desc = ("[ discover / test ] Whether to discover available pages" +
+    command_desc = ("[ discover / test ] Whether to discover available pages"+
         " or test for vulnerabilities")
     url_desc = "The URL of the website to discover or test"
-    common_desc = ("(discover only) Text file containing a list of common " +
+    common_desc = ("(discover only) Text file containing a list of common "+
         "words to try when searching for pages")
     auth_desc = "[ dvwa / bodgeit ] The custom authentication method to use"
+    vect_desc = "A file containing common strings used to exploit web pages"
+    sens_desc = ("A file containing data that is determined to be \"sensitive"+
+        "\", i.e. users should not see it")
+
 
     # add command line arguments to the parser
     parser.add_argument('command', metavar='command', type=str,
         help=command_desc)
     parser.add_argument('url', metavar='url', type=str,
         help=url_desc)
-    parser.add_argument('--common-words', metavar='file', help=common_desc, required=True)
+    parser.add_argument('--common-words', metavar='<file>', help=common_desc, required=True)
     parser.add_argument('--custom-auth', metavar='string', help=auth_desc)
-    parser.add_argument('--vectors', metavar='vectors', help='the vectors')
-    parser.add_argument('--sensitive', metavar='sensitive', help='sensitive stuff')
+    parser.add_argument('--vectors', metavar='<file>', help=vect_desc)
+    parser.add_argument('--sensitive', metavar='<file>', help=sens_desc)
 
     # parse the arguments
     args = parser.parse_args()
