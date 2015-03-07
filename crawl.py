@@ -5,9 +5,11 @@ from page import Page, PageSet
 
 session = None
 page_set = None
+custom_auth = None
 
-def perform_auth(custom_auth):
+def perform_auth():
     global session
+    global custom_auth
 
     # If custom_auth was used, set up the session.
     if custom_auth == "dvwa":
@@ -49,19 +51,20 @@ def auth_BodgeIt(session):
             "password" : password
         })
 
-    #session.auth = (username, password)
-
     return session
 
 
-def crawl(url, guessed_urls, custom_auth):
+def crawl(url, guessed_urls, in_custom_auth):
     global session
     global page_set
+    global custom_auth
+
+    custom_auth = in_custom_auth
 
     page_set = PageSet()
     session = requests.Session()
 
-    perform_auth(custom_auth)
+    perform_auth()
     recurse_crawl(url)
 
     # Guess URLs.
@@ -79,9 +82,9 @@ def crawl(url, guessed_urls, custom_auth):
 
 def recurse_crawl(url):
     global page_set
-
-    print("Crawling: " + str(url))
  
-    if page_set.create_or_update_page_by_url(url):
-        for link in page_set.get_page_by_url(url).links:
+    new_page = page_set.create_or_update_page_by_url(url)
+    if new_page is not None:
+        print("Crawling: " + str(url))
+        for link in new_page.links:
             recurse_crawl(link)

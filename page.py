@@ -29,7 +29,15 @@ class Page:
             r = crawl.session.get(url.url)
         except requests.exceptions.Timeout:
             print("  Timeout exceeded.")
+        if r.status_code == 403:
+            print("  Attempting re-auth.")
+            crawl.perform_auth()
+            try:
+                r = crawl.session.get(url.url)
+            except requests.exceptions.Timeout:
+                print("  Timeout exceeded.")
         self.status_code = r.status_code
+        #self.base_url = Url(r.url).get_absolute()
 
         beautiful = bs(r.content)
 
@@ -66,8 +74,8 @@ class Page:
     def matches_url(self, url):
         return self.base_url == url.get_absolute()
 
-
-
+    def get_url(self):
+        return Url(self.base_url)
 
 
 class PageSet:
@@ -92,11 +100,12 @@ class PageSet:
     def create_or_update_page_by_url(self, url):
         page = self.get_page_by_url(url)
         if page is None:
-            self.add_page(Page(url))
-            return True
+            new_page = Page(url)
+            self.add_page(new_page)
+            return new_page
         else:
             page.add_params_from_url(url)
-            return False
+            return None
 
     def get_page_by_url(self, url):
         for page in self.pages:
