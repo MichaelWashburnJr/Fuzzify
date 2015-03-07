@@ -1,16 +1,13 @@
 import requests
 from bs4 import BeautifulSoup as bs
 from url import Url, filter_externals
-from page import Page
+from page import Page, PageSet
 
-global visited
-global good_links
-global session
-global custom_auth
+session = None
+page_set = None
 
-def perform_auth():
+def perform_auth(custom_auth):
     global session
-    global custom_auth
 
     # If custom_auth was used, set up the session.
     if custom_auth == "dvwa":
@@ -57,100 +54,34 @@ def auth_BodgeIt(session):
     return session
 
 
-def crawl(domain, url, guessed_urls, in_custom_auth):
-    global visited
-    global good_links
+def crawl(url, guessed_urls, custom_auth):
     global session
-    global custom_auth
+    global page_set
 
-    visited = set()
-    good_links = set()
+    page_set = PageSet()
     session = requests.Session()
-    custom_auth = in_custom_auth
 
-    perform_auth()
-
-    recurse_crawl(domain, url)
+    perform_auth(custom_auth)
+    recurse_crawl(url)
 
     # Guess URLs.
     print("\nTesting guessed URLs...\n")
     for url_to_test in guessed_urls:
-        recurse_crawl(domain, url_to_test)
+        recurse_crawl(url_to_test)
     
-
     print("\n\n\n{:=^76}\n".format(" OUTPUT "))
 
-    print("\nPages found:")
-    for url in sorted(good_links, key=lambda u: u.url):
-        print(url.url)
-        if len(url.params) > 0:
-            print("    Variable(s) found:")
-            for input_variable in url.params:
-                print("      - " + input_variable)
-        if len(url.input_fields) > 0:
-            print("    Input field(s) found:")
-            for input_variable in url.input_fields:
-                print("      - " + str(input_variable))
+    print(str(page_set))
 
     print("\n\nSession Cookie List:")
     for cookie in session.cookies:
         print("  " + str(cookie))
 
-def update_params(url_set, url):
-    for u1 in url_set:
-        if (u1.get_absolute() == url.get_absolute()):
-            for inp in url.params:
-                if inp not in u1.params:
-                    u1.params.append(inp)
-
-def recurse_crawl(domain, url):
-    global visited
-    global good_links
-    global session
+def recurse_crawl(url):
+    global page_set
 
     print("Crawling: " + str(url))
-    links = []
-    try:
-        r = session.get(url.url)
-    except requests.exceptions.ConnectionError:
-        print("  ConnectionError")
-        return links
-    if r.status_code != 200:
-        print("  Status code: " + str(r.status_code))
-        if r.status_code == 403:
-            print("  Attempting re-auth...")
-            perform_auth()
-            try:
-                r = session.get(url.url)
-            except requests.exceptions.ConnectionError:
-                print("    ConnectionError")
-                return links
-            if r.status_code != 200:
-                print("    Status code: " + str(r.status_code))
-                return links
-        return links
-
-    good_links.add(url)
-
-    beautiful = bs(r.content)
-
-    # Find all input fields
-    for input_field in beautiful.find_all('input'):
-        url.input_fields.add(InputField(input_field, url))
-
-    # Find all links
-    for link in beautiful.find_all('a'):
-        linkContent = link.get('href')
-        if linkContent is not None:
-            links.append(Url(linkContent, source=r.url, domain=url.domain))
-    links = filter_externals(domain, links)
-    for link in links:
-        if link not in visited:
-            visited.add(link)
-            recurse_crawl(domain, link)
-        else:
-            update_params(good_links, link)
-
-    for link in links:
-        if PageSet.create_or_update_page_by_url(link):
+ 
+    if page_set.create_or_update_page_by_url(url):
+        for link in page_set.get_page_by_url(url).links:
             recurse_crawl(link)

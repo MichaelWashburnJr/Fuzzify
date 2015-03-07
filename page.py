@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup as bs
 from url import Url, filter_externals
+import crawl
 
 class InputField:
     def __init__(self, field_element, url):
@@ -15,7 +16,6 @@ class Page:
     __slots__ = ('base_url', 'domain', 'params', 'input_fields', 'links', 'status_code')
 
     def __init__(self, url):
-        global session
 
         self.params = set()
         self.input_fields = list()
@@ -26,7 +26,7 @@ class Page:
         self.domain = url.domain
 
         try:
-            r = session.get(url.url)
+            r = crawl.session.get(url.url)
         except requests.exceptions.Timeout:
             print("  Timeout exceeded.")
         self.status_code = r.status_code
@@ -45,6 +45,21 @@ class Page:
 
         self.links = filter_externals(self.domain, self.links)
 
+    def __str__(self):
+        returnStr = ""
+
+        returnStr += "URL: {0}\n".format(self.base_url)
+        if len(self.params) > 0:
+            returnStr += "    Variable(s) found:\n"
+            for input_variable in self.params:
+                returnStr += "      - {0}\n".format(str(input_variable))
+        if len(self.input_fields) > 0:
+            returnStr += "    Input field(s) found:\n"
+            for input_field in self.input_fields:
+                returnStr += "      - {0}\n".format(str(input_field))
+
+        return returnStr
+
     def add_params_from_url(self, url):
         self.params.update(url.params)
 
@@ -57,6 +72,19 @@ class Page:
 
 class PageSet:
     __slots__ = ('pages')
+
+    def __init__(self):
+        self.pages = list()
+
+    def __str__(self):
+        returnStr = ""
+
+        returnStr += "Pages found:\n"
+        for page in self.pages:
+            if page.status_code == 200:
+                returnStr += str(page) + '\n'
+
+        return returnStr
 
     """
     Returns true if the page was added.

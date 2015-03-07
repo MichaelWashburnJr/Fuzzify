@@ -65,7 +65,6 @@ def main():
 
     words = []
     url = Url(args.url)
-    domain = url.domain # parse the domain name from the given URL
 
     if (args.common_words):
         words = load_common_words(args.common_words)
@@ -80,7 +79,7 @@ def main():
         for extension in extensions:
             guessed_urls.append(Url(url.url + '/' + word + '.' + extension))
 
-    crawl(domain, url, guessed_urls, auth)
+    crawl(url, guessed_urls, auth)
 
     return
 
