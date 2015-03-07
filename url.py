@@ -6,17 +6,16 @@ File to abstract URL parsing logic
 """
 
 class Url():
-    __slots__ = ('domain', 'url', 'inputs', 'input_fields')
+    __slots__ = ('domain', 'url', 'params')
 
     def __init__(self, url, source="", domain=""):
-        self.input_fields = set()
         if '#' in url: #chop off anchors
             url = url[:url.index("#")]
         # If URL empty string, make things a little easier
         if (url == "" or url.startswith("mailto:") or url.startswith("javascript:")):
             self.url = source
             self.domain = domain
-            self.inputs = []
+            self.params = []
             return
         debug("URL: %s" % url)
         debug("Source: %s" % source)
@@ -36,7 +35,7 @@ class Url():
         parts = path.split("/")
         debug("Split to %r" % parts)
         canonical_parts = []
-        self.inputs = []
+        self.params = []
         debug("Iterating through parts")
         for part in parts:
             if (part == ""):
@@ -44,8 +43,8 @@ class Url():
             debug("Found part: %s" % part)
 
             if ('?' in part):
-                self.inputs += parse_query_string(part.split('?')[1])
-                debug("Inputs: %s " % self.inputs)
+                self.params += parse_query_string(part.split('?')[1])
+                debug("Inputs: %s " % self.params)
                 part = part.split("?")[0]
                 canonical_parts.append(part)
 
@@ -81,12 +80,12 @@ class Url():
 
 
 def parse_query_string(string):
-    inputs = []
+    params = []
     parts = string.split("&")
     for part in parts:
         input_field = part.split("=")[0]
-        inputs.append(input_field)
-    return inputs
+        params.append(input_field)
+    return params
 
 """
 Determine if a url is an absolute URL (it contains a protocol specifier)
