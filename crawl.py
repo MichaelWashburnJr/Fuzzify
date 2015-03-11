@@ -76,7 +76,7 @@ def crawl(url, guessed_urls, in_custom_auth):
 
     print(str(page_set))
 
-    print("\n\nSession Cookie List:")
+    print("\nSession Cookie List:")
     for cookie in session.cookies:
         print("  " + str(cookie))
 

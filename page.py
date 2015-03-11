@@ -1,5 +1,6 @@
 import requests
 from bs4 import BeautifulSoup as bs
+import itertools
 from url import Url, filter_externals
 import crawl
 
@@ -54,19 +55,19 @@ class Page:
         self.links = filter_externals(self.domain, self.links)
 
     def __str__(self):
-        returnStr = ""
+        return_str = ""
 
-        returnStr += "URL: {0}\n".format(self.base_url)
+        return_str += "URL: {0}\n".format(self.base_url)
         if len(self.params) > 0:
-            returnStr += "    Variable(s) found:\n"
+            return_str += "    Variable(s) found:\n"
             for input_variable in self.params:
-                returnStr += "      - {0}\n".format(str(input_variable))
+                return_str += "      - {0}\n".format(str(input_variable))
         if len(self.input_fields) > 0:
-            returnStr += "    Input field(s) found:\n"
+            return_str += "    Input field(s) found:\n"
             for input_field in self.input_fields:
-                returnStr += "      - {0}\n".format(str(input_field))
+                return_str += "      - {0}\n".format(str(input_field))
 
-        return returnStr
+        return return_str.rstrip()
 
     def add_params_from_url(self, url):
         self.params.update(url.params)
@@ -85,14 +86,27 @@ class PageSet:
         self.pages = list()
 
     def __str__(self):
-        returnStr = ""
+        return_str = "\"OK\" Pages found:\n"
+        not_ok_or_404_pages = list()
 
-        returnStr += "Pages found:\n"
         for page in self.pages:
             if page.status_code == 200:
-                returnStr += str(page) + '\n'
+                return_str += str(page) + '\n'
+            elif page.status_code != 404:
+                not_ok_or_404_pages.append(page)
 
-        return returnStr
+        if (len(not_ok_or_404_pages) > 0):
+            return_str += "\nOther Status Pages Found:\n"
+
+            not_ok_or_404_pages.sort(key=lambda p: p.status_code)
+            other_statuses = [list(g) for k, g in itertools.groupby(not_ok_or_404_pages, lambda p: p.status_code)]
+
+            for code in other_statuses:
+                return_str += "Status {0}:\n".format(str(code[0].status_code))
+                for page in code:
+                    return_str += str(page) + '\n'
+
+        return return_str.rstrip()
 
     """
     Returns true if the page was added.
