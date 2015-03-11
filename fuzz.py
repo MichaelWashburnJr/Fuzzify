@@ -12,11 +12,11 @@ VALID_COMMANDS = ['discover', 'test']
 
 """ The main function """
 def main():
-    # initialize an argument parser
+    # Initialize an argument parser
     parser = ArgumentParser(
         description="Discover vulnerabilities for web applications"
     )
-    # define 'help' strings up here to be cleaner
+    # Define 'help' strings up here to be cleaner
     command_desc = ("[ discover / test ] Whether to discover available pages"+
         " or test for vulnerabilities")
     url_desc = "The URL of the website to discover or test"
@@ -33,7 +33,7 @@ def main():
         "idered \"slow\". Default is 500 milliseconds")
 
 
-    # add command line arguments to the parser
+    # Add command line arguments to the parser
     parser.add_argument('command', metavar='command', type=str,
         help=command_desc)
     parser.add_argument('url', metavar='url', type=str,
@@ -45,10 +45,10 @@ def main():
     parser.add_argument('--random', metavar='[true/false]', help=rand_desc)
     parser.add_argument('--slow', metavar='<ms>', help=slow_desc)
 
-    # parse the arguments
+    # Parse the arguments
     args = parser.parse_args()
 
-    # validate arguments
+    # Validate arguments
     if (args.command.lower() not in VALID_COMMANDS):
         print("invalid command %s." % args.command)
         parser.print_help()
@@ -56,16 +56,17 @@ def main():
     if (args.command.lower() == "test"):
         print("test not implemented yet")
         exit()
-    if (args.slow  == None):#if slow is not set use the default
-        timeout = .5 #500ms is the default timeout for requests
-    else:#if slow is set try to parse it to an integer
+
+    if (args.slow  == None):# If slow is not set use the default
+        timeout = .5 # 500ms is the default timeout for requests
+    else: # If slow is set try to parse it to an integer
         try:
-            timeout = int(args.slow)/1000#convert from seconds to ms
+            timeout = int(args.slow)/1000 # Convert from MS to seconds
         except:
             print("Invalid value for argument 'slow': %s", args.slow)
             exit()
 
-    #validate custom auth arg
+    # Validate custom auth arg
     auth = ""
     valid_custom_auth = ["dvwa", "bodgeit"]
     if (args.custom_auth and args.custom_auth.lower() in valid_custom_auth):

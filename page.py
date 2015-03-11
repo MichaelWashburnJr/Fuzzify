@@ -29,7 +29,7 @@ class Page:
 
         r = None
         try:
-            r = crawl.session.get(url.url,)
+            r = crawl.session.get(url.url, timeout=req_timeout)
         except requests.exceptions.Timeout:
             print("  Timeout exceeded.")
 
@@ -38,7 +38,7 @@ class Page:
             print("  Attempting re-auth.")
             crawl.perform_auth()
             try:
-                r = crawl.session.get(url.url,)
+                r = crawl.session.get(url.url, timeout=req_timeout)
             except requests.exceptions.Timeout:
                 print("  Timeout exceeded.")
 
@@ -96,6 +96,7 @@ class PageSet:
     def __str__(self):
         return_str = "\"OK\" Pages found:\n"
         not_ok_or_404_pages = list()
+        timeout_pages = list()
 
         for page in self.pages:
             if page.status_code == 200:
@@ -110,9 +111,20 @@ class PageSet:
             other_statuses = [list(g) for k, g in itertools.groupby(not_ok_or_404_pages, lambda p: p.status_code)]
 
             for code in other_statuses:
-                return_str += "Status {0}:\n".format(str(code[0].status_code))
+                status_code = code[0].status_code
+                if status_code == -1:
+                    timeout_pages = code
+                    continue
+
+                return_str += "Status {0}:\n".format(str(status_code))
                 for page in code:
                     return_str += str(page) + '\n'
+
+        if (len(timeout_pages) > 0):
+            return_str += "\nTimeout Pages Found:\n"
+                
+            for page in timeout_pages:
+                return_str += str(page) + '\n'
 
         return return_str.rstrip()
 
