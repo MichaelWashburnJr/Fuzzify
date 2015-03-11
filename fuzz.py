@@ -56,6 +56,14 @@ def main():
     if (args.command.lower() == "test"):
         print("test not implemented yet")
         exit()
+    if (args.slow  == None):#if slow is not set use the default
+        timeout = .5 #500ms is the default timeout for requests
+    else:#if slow is set try to parse it to an integer
+        try:
+            timeout = int(args.slow)/1000#convert from seconds to ms
+        except:
+            print("Invalid value for argument 'slow': %s", args.slow)
+            exit()
 
     #validate custom auth arg
     auth = ""
@@ -79,7 +87,7 @@ def main():
         for extension in extensions:
             guessed_urls.append(Url(url.url + '/' + word + '.' + extension))
 
-    crawl(url, guessed_urls, auth)
+    crawl(url, guessed_urls, auth, timeout)
 
     return
 
