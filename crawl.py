@@ -54,14 +54,14 @@ def auth_BodgeIt(session):
     return session
 
 
-def crawl(url, guessed_urls, in_custom_auth):
+def crawl(url, guessed_urls, in_custom_auth, timeout):
     global session
     global page_set
     global custom_auth
 
     custom_auth = in_custom_auth
 
-    page_set = PageSet()
+    page_set = PageSet(timeout)
     session = requests.Session()
 
     perform_auth()

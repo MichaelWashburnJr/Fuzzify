@@ -16,7 +16,7 @@ class InputField:
 class Page:
     __slots__ = ('base_url', 'domain', 'params', 'input_fields', 'links', 'status_code')
 
-    def __init__(self, url):
+    def __init__(self, url, req_timeout):
 
         self.params = set()
         self.input_fields = list()
@@ -25,34 +25,41 @@ class Page:
         self.base_url = url.get_absolute()
         self.params.update(url.params)
         self.domain = url.domain
+        self.status_code = -1#this SHOULD be changed if it hasnt timed out
 
+        r = None
         try:
-            r = crawl.session.get(url.url)
+            r = crawl.session.get(url.url,)
         except requests.exceptions.Timeout:
             print("  Timeout exceeded.")
-        if r.status_code == 403:
+
+        #attempt reauthentication
+        if r != None and r.status_code == 403:
             print("  Attempting re-auth.")
             crawl.perform_auth()
             try:
-                r = crawl.session.get(url.url)
+                r = crawl.session.get(url.url,)
             except requests.exceptions.Timeout:
                 print("  Timeout exceeded.")
-        self.status_code = r.status_code
-        #self.base_url = Url(r.url).get_absolute()
 
-        beautiful = bs(r.content)
+        #if the request is valid and not timed out 
+        if r != None:
+            self.status_code = r.status_code
+            #self.base_url = Url(r.url).get_absolute()
 
-        # Find all input fields
-        for input_field in beautiful.find_all('input'):
-            self.input_fields.append(InputField(input_field, url))
+            beautiful = bs(r.content)
 
-        # Find all links
-        for link in beautiful.find_all('a'):
-            link_href = link.get('href')
-            if link_href is not None:
-                self.links.append(Url(link_href, source=r.url, domain=url.domain))
+            # Find all input fields
+            for input_field in beautiful.find_all('input'):
+                self.input_fields.append(InputField(input_field, url))
 
-        self.links = filter_externals(self.domain, self.links)
+            # Find all links
+            for link in beautiful.find_all('a'):
+                link_href = link.get('href')
+                if link_href is not None:
+                    self.links.append(Url(link_href, source=r.url, domain=url.domain))
+
+            self.links = filter_externals(self.domain, self.links)
 
     def __str__(self):
         return_str = ""
@@ -80,10 +87,11 @@ class Page:
 
 
 class PageSet:
-    __slots__ = ('pages')
+    __slots__ = ('pages', 'timeout')
 
-    def __init__(self):
+    def __init__(self, timeout):
         self.pages = list()
+        self.timeout = timeout
 
     def __str__(self):
         return_str = "\"OK\" Pages found:\n"
@@ -114,7 +122,7 @@ class PageSet:
     def create_or_update_page_by_url(self, url):
         page = self.get_page_by_url(url)
         if page is None:
-            new_page = Page(url)
+            new_page = Page(url, self.timeout)
             self.add_page(new_page)
             return new_page
         else:
