@@ -57,7 +57,7 @@ def main():
         print("test not implemented yet")
         exit()
 
-    if (args.slow  == None):# If slow is not set use the default
+    if (args.slow == None):# If slow is not set use the default
         timeout = .5 # 500ms is the default timeout for requests
     else: # If slow is set try to parse it to an integer
         try:
