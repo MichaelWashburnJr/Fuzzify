@@ -9,56 +9,66 @@ class Url():
     __slots__ = ('domain', 'url', 'params')
 
     def __init__(self, url, source="", domain=""):
-        if '#' in url: #chop off anchors
-            url = url[:url.index("#")]
-        # If URL empty string, make things a little easier
+        url = remove_after_last(url, '#')
+        # We can ignore empty URLs, or URLs that start with mailto: or javascript:
         if (url == "" or url.startswith("mailto:") or url.startswith("javascript:")):
             self.url = source
             self.domain = domain
             self.params = []
             return
+
         debug("URL: %s" % url)
         debug("Source: %s" % source)
         debug("Domain: %s" % domain)
+
+        # Convert the URL to an absolute path to start, so we have all the parts of it
         self.url = to_absolute(domain, source, url)
         debug("Absolute URL: %s" % self.url)
-        self.domain = get_domain(self.url) # Cover all cases
+        
+        # Parse the domain from the URL
+        self.domain = get_domain(self.url)
         debug("Interpreted domain: %s" % self.domain)
+
         # Now, we need the parts of the URL after the domain.
         # The domain IS a part of the URL at this point, guaranteed.
         d = self.domain # alias
         debug("Constructing URL. domain: %s" % d)
+        # Take all parts after the domain
         path = self.url[self.url.index(d) + len(d):]
         debug("Path: %s" % path)
+        # Remove any trailing '/'s
         path = path.strip("/")
         debug("Stripped to: %s" % path)
+        # Split on slashes
         parts = path.split("/")
         debug("Split to %r" % parts)
         canonical_parts = []
         self.params = []
         debug("Iterating through parts")
+        # Go through all the parts and build up a canonical URL
         for part in parts:
-            if (part == ""):
+            if (part == ""): #ignore multiple slashes
                 continue
             debug("Found part: %s" % part)
 
-            if ('?' in part):
+            if ('?' in part): # Query parameter case
                 self.params += parse_query_string(part.split('?')[1])
                 debug("Inputs: %s " % self.params)
                 part = part.split("?")[0]
 
+            # Not elif, because we want to just ignore the part after the '?'
             if (part == ".."): # Need to remove the previous part
                 if (len(canonical_parts) is not 0):
                     debug("Found '..', removing %s" % canonical_parts.pop())
 
-            elif (part == "."):
+            elif (part == "."): # ignore
                 continue
 
-            else:
+            else: # Normal URL part. Add to parts list.
                 canonical_parts.append(part)
         debug("Final parts: %r" % canonical_parts)
         
-
+        # Construct the final URL
         final_url = "http://" + self.domain
         for p in canonical_parts:
             final_url += "/" + p
@@ -105,6 +115,22 @@ def is_absolute(url):
     return "://" in url
 
 """
+Does some black magic python to remove all characters after and including
+the last occurrence of 'c' in the string 's'. If there is no occurrence,
+nothing happens and 's' is returned.
+Params:
+    s: The string to chop
+    c: The character after which the string should be chopped
+Returns:
+    s, but with all characters after/including the last occurrence of c removed.
+"""
+def remove_after_last(s, c):
+    if c not in s: return s
+    s = s[::-1]
+    s = s[s.index(c)+1:]
+    return s[::-1]
+
+"""
 Converts a URL to absolute from if it is not already in absolute form.
 Params:
     base: the base domain
@@ -114,34 +140,19 @@ Returns:
     An absolute URL referring to the given path.
 """
 def to_absolute(base, source, url):
-    try:
-        source = source[:source.index("#")]
-    except ValueError:
-        pass
-
-    try:
-        source = source[:source.index("?")]
-    except ValueError:
-        pass
-
-    if '/' in source:
-        # Use everything up to and including the last slash as the base
-        # reverse the source
-        new_source = source[::-1]
-        # Grab everything from the first slash on
-        new_source = new_source[new_source.index('/'):]
-        # reverse it again
-        source = new_source[::-1]
-
     # if URL already absolute, just return it
     if is_absolute(url):
         return url
+
+    source = remove_after_last(source, '#')
+    source = remove_after_last(source, '?')
+    source = remove_after_last(source, '/')
 
     if url[0] == "/": # e.g. /info/about.html
         return "http://" + base + url
 
     else: # e.g. projects/medialist
-        url = url.rstrip("#")
+        url = remove_after_last(url, '#')
         return source + "/" + url
 
 """
@@ -153,16 +164,16 @@ returns:
     the domain name from the given url
 """
 def get_domain(url):
-    try:
-        index = url.index("://")
-        url = url[index + 3:]
-    except ValueError:
+    if '://' not in url: # Relative path
         return ""
-    try:
+    # Trim out the http://
+    index = url.index("://")
+    url = url[index + 3:]
+
+    # Just want the part before the first /, this is the domain.
+    if '/' in url:
         index = url.index("/")
         url = url[:index]
-    except ValueError:
-        pass
 
     return url
 
@@ -178,10 +189,8 @@ returns:
 """
 def domain_matches(base, url_test):
     test = get_domain(url_test).strip()
-    # check for relative paths
-    if (test == ""):
-        return True
-    return base.lower() == test.lower()
+    # True if domain is the same or domain not given (relative path)
+    return base.lower() in (test.lower(), "")
 
 """
 Given a list of URLs, and a base domain, return a list with all URLs given
@@ -193,8 +202,13 @@ returns
     A list of URLs that match the given domain
 """
 def filter_externals(base, urls):
-    filtered_urls = []
-    for url in urls:
-        if domain_matches(base, str(url)):
-            filtered_urls.append(url)
-    return filtered_urls
+    return filter(lambda url: domain_matches(base, str(url)), urls)
+
+if __name__ == "__main__":
+    urls = ("test/test#test",
+        "test/test?test=test")
+    base = "www.corb.co"
+    source = "http://www.corb.co/"
+
+    for u in urls:
+        print(to_absolute(base, source, u))
