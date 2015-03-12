@@ -1,6 +1,6 @@
 import module_check
 
-#do all imports if the required packages were found
+# Do all imports if the required packages were found
 if module_check.all_found:
     from url import Url
     from utils import load_common_words
@@ -57,16 +57,16 @@ def main():
         print("test not implemented yet")
         exit()
 
-    if (args.slow == None):# If slow is not set use the default
+    if (args.slow == None): # If the argument was excluded, set default
         timeout = .5 # 500ms is the default timeout for requests
-    else: # If slow is set try to parse it to an integer
+    else: # If the argument was set, parse timeout
         try:
             timeout = int(args.slow)/1000 # Convert from MS to seconds
         except:
             print("Invalid value for argument 'slow': %s", args.slow)
             exit()
 
-    # Validate custom auth arg
+    # Validate custom auth argument
     auth = ""
     valid_custom_auth = ["dvwa", "bodgeit"]
     if (args.custom_auth and args.custom_auth.lower() in valid_custom_auth):
@@ -79,8 +79,6 @@ def main():
         words = load_common_words(args.common_words)
 
     extensions = load_common_words("extensions.txt")
-
-    # This is where stuff starts to happen
 
     # Build the page guessing Urls.
     guessed_urls = []
