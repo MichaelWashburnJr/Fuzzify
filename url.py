@@ -47,7 +47,7 @@ class Url():
         debug("Iterating through parts")
         # Go through all the parts and build up a canonical URL
         for part in parts:
-            if (part == ""): #ignore multiple slashes
+            if (part == ""): # Ignore multiple slashes
                 continue
             debug("Found part: %s" % part)
 
@@ -61,7 +61,7 @@ class Url():
                 if (len(canonical_parts) is not 0):
                     debug("Found '..', removing %s" % canonical_parts.pop())
 
-            elif (part == "."): # ignore
+            elif (part == "."): # Ignore
                 continue
 
             else: # Normal URL part. Add to parts list.
@@ -125,7 +125,7 @@ Returns:
     s, but with all characters after/including the last occurrence of c removed.
 """
 def remove_after_last(s, c):
-    return s if c not in s else s[::-1][s[::-1].index(c)+1:][::-1] #AHAHAHAHAHA
+    return s if c not in s else s[::-1][s[::-1].index(c)+1:][::-1] # Adam...
 
 """
 Converts a URL to absolute from if it is not already in absolute form.
@@ -137,7 +137,7 @@ Returns:
     An absolute URL referring to the given path.
 """
 def to_absolute(base, source, url):
-    # if URL already absolute, just return it
+    # If URL already absolute, just return it
     if is_absolute(url):
         return url
 

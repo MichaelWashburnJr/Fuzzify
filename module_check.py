@@ -11,10 +11,10 @@ def TryModule(module_name, print_name, pip_name):
         print("Error: Package \"" + print_name +"\" not found.")
         return False
 
-""" Check for required packages"""
+# Check for required packages
 all_found = True
-all_found &= TryModule("requests", "Requests", "requests")
-all_found &= TryModule("bs4", "BeautifulSoup4", "BeautifulSoup4")#BeautifulSoup4
+all_found &= TryModule("requests", "Requests", "requests") # Requests
+all_found &= TryModule("bs4", "BeautifulSoup4", "BeautifulSoup4") # BeautifulSoup4
 
 if not all_found:
-	print("Install missing packages with \"pip install -r requirements.txt\"")
+    print("Install missing packages with \"pip install -r requirements.txt\"")
