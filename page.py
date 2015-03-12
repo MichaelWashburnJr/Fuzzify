@@ -149,6 +149,3 @@ class PageSet:
 
     def add_page(self, page):
         self.pages.append(page)
-
-    
-
