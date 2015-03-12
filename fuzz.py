@@ -1,3 +1,12 @@
+"""
+fuzz.py
+
+SWEN-331 Fuzzer Project.
+See the included README.md file.
+
+Main entrance point for the fuzzer.
+"""
+
 import module_check
 
 # Do all imports if the required packages were found

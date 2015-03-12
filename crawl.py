@@ -1,6 +1,10 @@
+"""
+crawl.py
+
+Handles the recursion of crawling and the authentication logic.
+"""
+
 import requests
-from bs4 import BeautifulSoup as bs
-from url import Url, filter_externals
 from page import Page, PageSet
 
 session = None

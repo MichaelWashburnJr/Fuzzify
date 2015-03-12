@@ -1,3 +1,9 @@
+"""
+module_check.py
+
+Verifies that all of the external modules are available.
+"""
+
 import imp
 
 """

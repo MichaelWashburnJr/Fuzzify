@@ -1,8 +1,20 @@
+"""
+page.py
+
+Handles Page Sets, Pages, and Input Fields.
+"""
+
+# External modules
 import requests
 from bs4 import BeautifulSoup as bs
+
+# Standard
 import itertools
+
+# Other files in project
 from url import Url, filter_externals
 import crawl
+
 
 class InputField:
     def __init__(self, field_element, url):

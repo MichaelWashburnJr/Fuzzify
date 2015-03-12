@@ -1,9 +1,10 @@
-from utils import debug
-
 """
 url.py
-File to abstract URL parsing logic
+
+Abstracts URL parsing logic
 """
+
+from utils import debug
 
 class Url():
     __slots__ = ('domain', 'url', 'params')

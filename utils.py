@@ -1,13 +1,14 @@
 """
 util.py
-file to hold helper and general utility functions
+
+Holds helper and general utility functions
 """
 
 global debug_flag
 debug_flag = False
 
 """
-Function to handle debug printing
+Handle debug printing.
 """
 def debug(text):
     global debug_flag
