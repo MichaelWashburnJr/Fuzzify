@@ -125,10 +125,7 @@ Returns:
     s, but with all characters after/including the last occurrence of c removed.
 """
 def remove_after_last(s, c):
-    if c not in s: return s
-    s = s[::-1]
-    s = s[s.index(c)+1:]
-    return s[::-1]
+    return s if c not in s else s[::-1][s[::-1].index(c)+1:][::-1] #AHAHAHAHAHA
 
 """
 Converts a URL to absolute from if it is not already in absolute form.
