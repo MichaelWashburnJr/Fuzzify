@@ -46,14 +46,13 @@ class Url():
                 self.params += parse_query_string(part.split('?')[1])
                 debug("Inputs: %s " % self.params)
                 part = part.split("?")[0]
-                canonical_parts.append(part)
 
-            elif (part == ".."): # Need to remove the previous part
+            if (part == ".."): # Need to remove the previous part
                 if (len(canonical_parts) is not 0):
                     debug("Found '..', removing %s" % canonical_parts.pop())
 
             elif (part == "."):
-                pass
+                continue
 
             else:
                 canonical_parts.append(part)
@@ -78,7 +77,15 @@ class Url():
     def __hash__(self):
         return hash(self.get_absolute())
 
-
+"""
+Returns a list of parameters gathered from the "Query String" found at
+the end of some URLs. Query strings are of the form:
+    ?[param]=[value]&[param2]=[value2]$...
+Params:
+    string: The query string (first question mark removed)
+Returns:
+    A list of parameters parsed from the query string.
+"""
 def parse_query_string(string):
     params = []
     parts = string.split("&")
@@ -191,20 +198,3 @@ def filter_externals(base, urls):
         if domain_matches(base, str(url)):
             filtered_urls.append(url)
     return filtered_urls
-
-
-if __name__ == "__main__":
-    base = "corb.co"
-    source = "http://corb.co/projects"
-    urls = [
-        "test/",
-        "/test/",
-        "http://corb.co",
-        "http://corb.co/asdf/../test?argument=banana&test=false#tagsgoherewoo",
-        "test?test",
-        "test?test=",
-        "////////test?test",
-        "http://google.com/intl/en/policies/terms/../../policies/terms/../../policies/technologies/location-data/../../../policies/faq/../../policies/terms/../../policies/privacy/../../policies/privacy/key-terms/../../../policies/technologies/voice/../../../policies/technologies/../../policies/technologies/../../policies/technologies/ads/../../../policies/privacy/../../policies/privacy/example/wifi-access-points-and-cell-towers.html/../../../policies/privacy/archive/"
-    ]
-    for url in urls:
-        print(str(Url(url, source, base)))
