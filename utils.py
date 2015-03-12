@@ -9,6 +9,8 @@ debug_flag = False
 
 """
 Handle debug printing.
+Params:
+    text: the string to print.
 """
 def debug(text):
     global debug_flag
@@ -18,9 +20,9 @@ def debug(text):
 
 """
 Reads in each line from a text file and returns a list of the words found.
-params:
+Params:
     filename: path to the file to open
-returns:
+Returns:
     An array-list of words found
 """
 def load_common_words(filename):

@@ -11,6 +11,9 @@ session = None
 page_set = None
 custom_auth = None
 
+"""
+Authenticate a request, based on the custom_auth string.
+"""
 def perform_auth():
     global session
     global custom_auth
@@ -22,7 +25,11 @@ def perform_auth():
         session = auth_BodgeIt(session)
 
 """
-Authorize a session on the DVWA website
+Authenticate a session on the DVWA website.
+Params:
+    session: a Requests.Session object to use
+Returns:
+    session: the modified Requests.Session object
 """
 def auth_DVWA(session):
     r = session.post("http://127.0.0.1/dvwa/login.php?",
@@ -34,7 +41,11 @@ def auth_DVWA(session):
     return session
 
 """
-Create a user and authorize a session on the BodgeIt website
+Create a user and authenticate a session on the BodgeIt website.
+Params:
+    session: a Requests.Session object to use
+Returns:
+    session: the modified Requests.Session object
 """
 def auth_BodgeIt(session):
     username = "test@test.test"
@@ -57,7 +68,15 @@ def auth_BodgeIt(session):
 
     return session
 
-
+"""
+Begin crawling, starting with the base URL, then the guessed URLs.
+Then, print the Page Set and the session cookies.
+Params:
+    url: the base Url to begin crawling from
+    guessed_urls: a list of additional Urls to crawl from
+    in_custom_auth: the custom authentication string to determine login
+    timeout: the Requests timeout, in seconds
+"""
 def crawl(url, guessed_urls, in_custom_auth, timeout):
     global session
     global page_set
@@ -84,6 +103,11 @@ def crawl(url, guessed_urls, in_custom_auth, timeout):
     for cookie in session.cookies:
         print("  " + str(cookie))
 
+"""
+Recursively create/update pages.
+Params:
+    url: the Url to crawl from
+"""
 def recurse_crawl(url):
     global page_set
  

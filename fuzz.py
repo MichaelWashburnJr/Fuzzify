@@ -19,7 +19,10 @@ if module_check.all_found:
 
 VALID_COMMANDS = ['discover', 'test']
 
-""" The main function """
+""" 
+The main function.
+Parses command line arguments and call crawl.
+"""
 def main():
     # Initialize an argument parser
     parser = ArgumentParser(

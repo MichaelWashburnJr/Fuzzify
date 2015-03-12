@@ -15,16 +15,23 @@ import itertools
 from url import Url, filter_externals
 import crawl
 
-
+"""
+Represents an HTML input field on a page.
+"""
 class InputField:
+
     def __init__(self, field_element, url):
         self.name = field_element.get('name')
         self.id = field_element.get('id')
         self.type = field_element.get('type')
         self.from_url = url
+
     def __str__(self):
         return "name: {!s:<17} id: {!s:<17} type: {!s:<15}".format(self.name, self.id, self.type)
 
+"""
+Represents a Page, including links, input fields, and URL.
+"""
 class Page:
     __slots__ = ('base_url', 'domain', 'params', 'input_fields', 'links', 'status_code')
 
@@ -86,18 +93,37 @@ class Page:
             for input_field in self.input_fields:
                 return_str += "      - {0}\n".format(str(input_field))
 
-        return return_str.rstrip()
+        return return_str.rstrip() # Strip the last newline character.
 
+    """
+    Update the set of parameters with the parameters from the given URL.
+    Params:
+        url: the Url to get parameters from
+    """
     def add_params_from_url(self, url):
         self.params.update(url.params)
 
+    """
+    Check if this Page's base Url matches the given Url.
+    Params:
+        url: the Url to match against
+    Returns:
+        True if this Page's base URL matches the given URL.
+    """
     def matches_url(self, url):
         return self.base_url == url.get_absolute()
 
+    """
+    Get this Page's Url.
+    Returns:
+        A Url object representing this Page's base URL.
+    """
     def get_url(self):
         return Url(self.base_url)
 
-
+"""
+Represents the set of Pages that are encountered in the crawl.
+"""
 class PageSet:
     __slots__ = ('pages', 'timeout')
 
@@ -138,10 +164,17 @@ class PageSet:
             for page in timeout_pages:
                 return_str += str(page) + '\n'
 
-        return return_str.rstrip()
+        return return_str.rstrip() # Strip the last newline character.
 
     """
-    Returns true if the page was added.
+    If a Page exists that matches the given URL, 
+        update the Page with the parameters from the URL and return None.
+    Else, create and return a new Page based on the given URL.
+    Params:
+        url: the Url to check against
+    Returns:
+        Page if a Page was created.
+        None if a Page was updated.
     """
     def create_or_update_page_by_url(self, url):
         page = self.get_page_by_url(url)
@@ -153,11 +186,24 @@ class PageSet:
             page.add_params_from_url(url)
             return None
 
+    """
+    Get the Page that contains the given URL.
+    Params:
+        url: the Url to use for lookup
+    Returns:
+        Page if there is a matching Page.
+        None if there isn't a matching Page.
+    """
     def get_page_by_url(self, url):
         for page in self.pages:
             if page.matches_url(url):
                 return page
         return None
 
+    """
+    Add the given Page to this PageSet.
+    Params:
+        page: the Page to add to this PageSet.
+    """
     def add_page(self, page):
         self.pages.append(page)
