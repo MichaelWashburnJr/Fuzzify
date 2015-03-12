@@ -25,7 +25,7 @@ class Page:
         self.base_url = url.get_absolute()
         self.params.update(url.params)
         self.domain = url.domain
-        self.status_code = -1#this SHOULD be changed if it hasnt timed out
+        self.status_code = -1 # Assume the page will time out. 
 
         r = None
         try:
@@ -33,7 +33,7 @@ class Page:
         except requests.exceptions.Timeout:
             print("  Timeout exceeded.")
 
-        #attempt reauthentication
+        # Attempt reauthentication
         if r != None and r.status_code == 403:
             print("  Attempting re-auth.")
             crawl.perform_auth()
@@ -42,7 +42,7 @@ class Page:
             except requests.exceptions.Timeout:
                 print("  Timeout exceeded.")
 
-        #if the request is valid and not timed out 
+        # If the request is valid and not timed out 
         if r != None:
             self.status_code = r.status_code
             #self.base_url = Url(r.url).get_absolute()
