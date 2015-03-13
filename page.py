@@ -35,7 +35,7 @@ Represents a Page, including links, input fields, and URL.
 """
 class Page:
     __slots__ = ('base_url', 'domain', 'params', 'input_fields',
-                 'links', 'status_code', 'test')
+                 'links', 'status_code', 'test', 'is_sanitary')
 
     def __init__(self, url, test, req_timeout, vectors):
 
@@ -43,11 +43,13 @@ class Page:
         self.input_fields = list()
         self.links = list()
         self.test = test
+        self.status_code = -1 # Assume the page will time out. 
+        self.is_sanitary = True
 
         self.base_url = url.get_absolute()
         self.params.update(url.params)
         self.domain = url.domain
-        self.status_code = -1 # Assume the page will time out. 
+
 
         r = None
         try:
@@ -132,11 +134,12 @@ class Page:
                             #add the input to the payload
                             if "name" in input_field:
                                 payload[input_field["name"]] = value
-                                
+
                         #make the post request
                         r = crawl.session.post(self.base_url, data=payload)
                         if vector in r.text:
-                            print("Code not sanatized: " + vector)
+                            print("  Code not sanatized: " + vector)
+                            self.is_sanitary = False;
                             #no need to continue once we no this page isnt sanitary...
                             break;
 
@@ -186,12 +189,17 @@ class PageSet:
         return_str = "\"OK\" Pages found:\n"
         not_ok_or_404_pages = list()
         timeout_pages = list()
+        not_sanitary_pages = list()
 
         for page in self.pages:
             if page.status_code == 200:
                 return_str += str(page) + '\n'
             elif page.status_code != 404:
                 not_ok_or_404_pages.append(page)
+            #build list of unsanitized pages
+            if not page.is_sanitary:
+                not_sanitary_pages.append(page)
+
 
         if (len(not_ok_or_404_pages) > 0):
             return_str += "\nOther Status Pages Found:\n"
@@ -213,6 +221,13 @@ class PageSet:
             return_str += "\nTimeout Pages Found:\n"
                 
             for page in timeout_pages:
+                return_str += str(page) + '\n'
+
+
+        if(len(not_sanitary_pages) > 0):
+            return_str += "\nPages with Sanitization Errors:\n"
+
+            for page in not_sanitary_pages:
                 return_str += str(page) + '\n'
 
         return return_str.rstrip() # Strip the last newline character.
