@@ -19,14 +19,14 @@ def debug(text):
 
 
 """
-Reads in each line from a text file and returns a list of the words found.
+Reads in each line from a text file and returns a list of all lines.
 Params:
     filename: path to the file to open
 Returns:
-    An array-list of words found
+    An array-list of lines found
 """
-def load_common_words(filename):
-    words = []
+def load_lines_from_file(filename):
+    lines = []
     for line in open(filename):
-        words.append(line.strip())
-    return words
+        lines.append(line.strip())
+    return lines

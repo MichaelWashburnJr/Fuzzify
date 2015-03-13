@@ -12,7 +12,7 @@ import module_check
 # Do all imports if the required packages were found
 if module_check.all_found:
     from url import Url
-    from utils import load_common_words
+    from utils import load_lines_from_file
     from crawl import crawl
     from sys import argv
     from argparse import ArgumentParser
@@ -78,9 +78,9 @@ def main():
     url = Url(args.url)
 
     if (args.common_words):
-        words = load_common_words(args.common_words)
+        words = load_lines_from_file(args.common_words)
 
-    extensions = load_common_words("extensions.txt")
+    extensions = load_lines_from_file("extensions.txt")
 
     # Build the page guessing Urls.
     guessed_urls = []
