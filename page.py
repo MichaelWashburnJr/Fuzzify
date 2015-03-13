@@ -120,6 +120,7 @@ class Page:
                     if vector != html.escape(vector, quote=False):
                         #first reload the page
                         r = crawl.session.get(self.base_url, timeout=req_timeout)
+
                         #gather inputs and values for the form
                         payload = dict()
                         beautiful = bs(r.content)
@@ -129,12 +130,15 @@ class Page:
                             if input_field["type"] in ("submit", "hidden"):
                                 value = input_field["value"]
                             #add the input to the payload
-                            payload[input_field["name"]] = value
+                            if "name" in input_field:
+                                payload[input_field["name"]] = value
+                                
                         #make the post request
                         r = crawl.session.post(self.base_url, data=payload)
                         if vector in r.text:
                             print("Code not sanatized: " + vector)
-
+                            #no need to continue once we no this page isnt sanitary...
+                            break;
 
                 #catch the timeout exception only
                 except requests.exceptions.Timeout:
