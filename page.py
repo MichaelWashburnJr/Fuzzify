@@ -81,6 +81,14 @@ class Page:
 
             self.links = filter_externals(self.domain, self.links)
 
+            if self.test:
+                # Do the additional test actions (sensitive data leaks)
+
+                # for sensiword in sensitive_words:
+                #     if (sensiword in r.content):
+                #         print("You done goofed!")
+                pass
+
     def __str__(self):
         return_str = ""
 
