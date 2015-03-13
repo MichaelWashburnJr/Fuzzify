@@ -37,7 +37,7 @@ class Page:
     __slots__ = ('base_url', 'domain', 'params', 'input_fields',
                  'links', 'status_code', 'test', 'is_sanitary')
 
-    def __init__(self, url, test, req_timeout, vectors):
+    def __init__(self, url, test, req_timeout):
 
         self.params = set()
         self.input_fields = list()
@@ -86,13 +86,14 @@ class Page:
             self.links = filter_externals(self.domain, self.links)
 
             if self.test:
-                # Do the additional test actions (sensitive data leaks, sanitization)
-                self.test_sanitization(req_timeout, vectors)
+                # Do the additional test actions (sensitive data leaks)
+            
                 #TODO: this would make a nice helper funtion that we could run
                 #       all responses through to check for data leaks
                 # for sensiword in sensitive_words:
                 #     if (sensiword in r.content):
                 #         print("You done goofed!")
+                pass
 
     def __str__(self):
         return_str = ""
@@ -114,6 +115,7 @@ class Page:
     """
     def test_sanitization(self, req_timeout, vectors):
         #only try if there are inputs for this page
+        print("Testing: " + self.base_url)
         if len(self.input_fields) > 0:
             for vector in vectors: #for each vector 
                 try:
@@ -138,9 +140,9 @@ class Page:
                         #make the post request
                         r = crawl.session.post(self.base_url, data=payload)
                         if vector in r.text:
-                            print("  Code not sanatized: " + vector)
+                            print("  Code not sanitized: " + vector)
                             self.is_sanitary = False;
-                            #no need to continue once we no this page isnt sanitary...
+                            #no need to continue once we no this page isn't sanitary...
                             break;
 
                 #catch the timeout exception only
@@ -233,6 +235,14 @@ class PageSet:
         return return_str.rstrip() # Strip the last newline character.
 
     """
+    Run sanitization tests on all pages.
+    """
+    def test_sanitization(self):
+        print("\nTesting Sanitization...\n")
+        for page in self.pages:
+            page.test_sanitization(self.timeout, self.vectors)
+
+    """
     If a Page exists that matches the given URL, 
         update the Page with the parameters from the URL and return None.
     Else, create and return a new Page based on the given URL.
@@ -245,7 +255,7 @@ class PageSet:
     def create_or_update_page_by_url(self, url):
         page = self.get_page_by_url(url)
         if page is None:
-            new_page = Page(url, self.test, self.timeout, self.vectors)
+            new_page = Page(url, self.test, self.timeout)
             self.add_page(new_page)
             return new_page
         else:
