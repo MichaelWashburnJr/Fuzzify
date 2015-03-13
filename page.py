@@ -14,6 +14,7 @@ import itertools
 # Other files in project
 from url import Url, filter_externals
 import crawl
+import html
 
 """
 Represents an HTML input field on a page.
@@ -33,9 +34,10 @@ class InputField:
 Represents a Page, including links, input fields, and URL.
 """
 class Page:
-    __slots__ = ('base_url', 'domain', 'params', 'input_fields', 'links', 'status_code', 'test')
+    __slots__ = ('base_url', 'domain', 'params', 'input_fields',
+                 'links', 'status_code', 'test')
 
-    def __init__(self, url, test, req_timeout):
+    def __init__(self, url, test, req_timeout, vectors):
 
         self.params = set()
         self.input_fields = list()
@@ -82,12 +84,13 @@ class Page:
             self.links = filter_externals(self.domain, self.links)
 
             if self.test:
-                # Do the additional test actions (sensitive data leaks)
-
+                # Do the additional test actions (sensitive data leaks, sanitization)
+                self.test_sanitization(req_timeout, vectors)
+                #TODO: this would make a nice helper funtion that we could run
+                #       all responses through to check for data leaks
                 # for sensiword in sensitive_words:
                 #     if (sensiword in r.content):
                 #         print("You done goofed!")
-                pass
 
     def __str__(self):
         return_str = ""
@@ -103,6 +106,39 @@ class Page:
                 return_str += "      - {0}\n".format(str(input_field))
 
         return return_str.rstrip() # Strip the last newline character.
+
+    """
+    Test that the page sanitizes its inputs
+    """
+    def test_sanitization(self, req_timeout, vectors):
+        #only try if there are inputs for this page
+        if len(self.input_fields) > 0:
+            for vector in vectors: #for each vector 
+                try:
+
+                    #if the vector has characters that should be escaped in it, test
+                    if vector != html.escape(vector, quote=False):
+                        #first reload the page
+                        r = crawl.session.get(self.base_url, timeout=req_timeout)
+                        #gather inputs and values for the form
+                        payload = dict()
+                        beautiful = bs(r.content)
+                        for input_field in beautiful.find_all('input'):                            
+                            #if the type is submit or it is hidden, dont use the vector
+                            value = vector
+                            if input_field["type"] in ("submit", "hidden"):
+                                value = input_field["value"]
+                            #add the input to the payload
+                            payload[input_field["name"]] = value
+                        #make the post request
+                        r = crawl.session.post(self.base_url, data=payload)
+                        if vector in r.text:
+                            print("Code not sanatized: " + vector)
+
+
+                #catch the timeout exception only
+                except requests.exceptions.Timeout:
+                    print("  Timeout exceeded.")
 
     """
     Update the set of parameters with the parameters from the given URL.
@@ -134,12 +170,13 @@ class Page:
 Represents the set of Pages that are encountered in the crawl.
 """
 class PageSet:
-    __slots__ = ('pages', 'test', 'timeout')
+    __slots__ = ('pages', 'test', 'timeout', 'vectors')
 
-    def __init__(self, test, timeout):
+    def __init__(self, test, timeout, vectors):
         self.pages = list()
         self.test = test
         self.timeout = timeout
+        self.vectors = vectors
 
     def __str__(self):
         return_str = "\"OK\" Pages found:\n"
@@ -189,7 +226,7 @@ class PageSet:
     def create_or_update_page_by_url(self, url):
         page = self.get_page_by_url(url)
         if page is None:
-            new_page = Page(url, self.test, self.timeout)
+            new_page = Page(url, self.test, self.timeout, self.vectors)
             self.add_page(new_page)
             return new_page
         else:
