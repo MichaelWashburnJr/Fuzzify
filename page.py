@@ -14,6 +14,7 @@ import itertools
 # Other files in project
 from url import Url, filter_externals
 import crawl
+import html
 
 """
 Represents an HTML input field on a page.
@@ -33,7 +34,8 @@ class InputField:
 Represents a Page, including links, input fields, and URL.
 """
 class Page:
-    __slots__ = ('base_url', 'domain', 'params', 'input_fields', 'links', 'status_code', 'test')
+    __slots__ = ('base_url', 'domain', 'params', 'input_fields',
+                 'links', 'status_code', 'test', 'is_sanitary')
 
     def __init__(self, url, test, req_timeout):
 
@@ -41,11 +43,13 @@ class Page:
         self.input_fields = list()
         self.links = list()
         self.test = test
+        self.status_code = -1 # Assume the page will time out. 
+        self.is_sanitary = True
 
         self.base_url = url.get_absolute()
         self.params.update(url.params)
         self.domain = url.domain
-        self.status_code = -1 # Assume the page will time out. 
+
 
         r = None
         try:
@@ -83,7 +87,9 @@ class Page:
 
             if self.test:
                 # Do the additional test actions (sensitive data leaks)
-
+            
+                #TODO: this would make a nice helper funtion that we could run
+                #       all responses through to check for data leaks
                 # for sensiword in sensitive_words:
                 #     if (sensiword in r.content):
                 #         print("You done goofed!")
@@ -103,6 +109,45 @@ class Page:
                 return_str += "      - {0}\n".format(str(input_field))
 
         return return_str.rstrip() # Strip the last newline character.
+
+    """
+    Test that the page sanitizes its inputs
+    """
+    def test_sanitization(self, req_timeout, vectors):
+        #only try if there are inputs for this page
+        print("Testing: " + self.base_url)
+        if len(self.input_fields) > 0:
+            for vector in vectors: #for each vector 
+                try:
+
+                    #if the vector has characters that should be escaped in it, test
+                    if vector != html.escape(vector, quote=False):
+                        #first reload the page
+                        r = crawl.session.get(self.base_url, timeout=req_timeout)
+
+                        #gather inputs and values for the form
+                        payload = dict()
+                        beautiful = bs(r.content)
+                        for input_field in beautiful.find_all('input'):                            
+                            #if the type is submit or it is hidden, dont use the vector
+                            value = vector
+                            if input_field["type"] in ("submit", "hidden"):
+                                value = input_field["value"]
+                            #add the input to the payload
+                            if "name" in input_field:
+                                payload[input_field["name"]] = value
+
+                        #make the post request
+                        r = crawl.session.post(self.base_url, data=payload)
+                        if vector in r.text:
+                            print("  Code not sanitized: " + vector)
+                            self.is_sanitary = False;
+                            #no need to continue once we no this page isn't sanitary...
+                            break;
+
+                #catch the timeout exception only
+                except requests.exceptions.Timeout:
+                    print("  Timeout exceeded.")
 
     """
     Update the set of parameters with the parameters from the given URL.
@@ -134,23 +179,29 @@ class Page:
 Represents the set of Pages that are encountered in the crawl.
 """
 class PageSet:
-    __slots__ = ('pages', 'test', 'timeout')
+    __slots__ = ('pages', 'test', 'timeout', 'vectors')
 
-    def __init__(self, test, timeout):
+    def __init__(self, test, timeout, vectors):
         self.pages = list()
         self.test = test
         self.timeout = timeout
+        self.vectors = vectors
 
     def __str__(self):
         return_str = "\"OK\" Pages found:\n"
         not_ok_or_404_pages = list()
         timeout_pages = list()
+        not_sanitary_pages = list()
 
         for page in self.pages:
             if page.status_code == 200:
                 return_str += str(page) + '\n'
             elif page.status_code != 404:
                 not_ok_or_404_pages.append(page)
+            #build list of unsanitized pages
+            if not page.is_sanitary:
+                not_sanitary_pages.append(page)
+
 
         if (len(not_ok_or_404_pages) > 0):
             return_str += "\nOther Status Pages Found:\n"
@@ -174,7 +225,22 @@ class PageSet:
             for page in timeout_pages:
                 return_str += str(page) + '\n'
 
+
+        if(len(not_sanitary_pages) > 0):
+            return_str += "\nPages with Sanitization Errors:\n"
+
+            for page in not_sanitary_pages:
+                return_str += str(page) + '\n'
+
         return return_str.rstrip() # Strip the last newline character.
+
+    """
+    Run sanitization tests on all pages.
+    """
+    def test_sanitization(self):
+        print("\nTesting Sanitization...\n")
+        for page in self.pages:
+            page.test_sanitization(self.timeout, self.vectors)
 
     """
     If a Page exists that matches the given URL, 

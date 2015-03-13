@@ -99,15 +99,17 @@ def main():
 
     # Test setup
     test = False
+    vectors = []
     if (args.command.lower() == "test"):
         # Set up to do the testing version
         test = True
 
         # Set up the additional testing parts here (sensitive data leaked, lack of sanitization)
-        
+        if args.vectors:
+            vectors = load_lines_from_file(args.vectors)
 
 
-    crawl(url, guessed_urls, auth, test, timeout)
+    crawl(url, guessed_urls, auth, test, timeout, vectors)
 
     return
 

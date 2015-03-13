@@ -77,15 +77,16 @@ Params:
     in_custom_auth: the custom authentication string to determine login
     test: True when test is specified
     timeout: the Requests timeout, in seconds
+    vecors: used for test only. A list of inputs to try in forms.
 """
-def crawl(url, guessed_urls, in_custom_auth, test, timeout):
+def crawl(url, guessed_urls, in_custom_auth, test, timeout, vectors):
     global session
     global page_set
     global custom_auth
 
     custom_auth = in_custom_auth
 
-    page_set = PageSet(test, timeout)
+    page_set = PageSet(test, timeout, vectors)
     session = requests.Session()
 
     perform_auth()
@@ -95,6 +96,9 @@ def crawl(url, guessed_urls, in_custom_auth, test, timeout):
     print("\nTesting guessed URLs...\n")
     for url_to_test in guessed_urls:
         recurse_crawl(url_to_test)
+    
+    #do sanitization checks
+    page_set.test_sanitization();
     
     print("\n\n\n{:=^76}\n".format(" OUTPUT "))
 
