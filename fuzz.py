@@ -48,9 +48,9 @@ def main():
     # Add command line arguments to the parser
     parser.add_argument('command', metavar='command', type=str,
         help=command_desc)
-    parser.add_argument('url', metavar='url', type=str,
-        help=url_desc)
-    parser.add_argument('--common-words', metavar='<file>', help=common_desc, required=True)
+    parser.add_argument('url', metavar='url', type=str, help=url_desc)
+    parser.add_argument('--common-words', metavar='<file>', help=common_desc, 
+        required=True)
     parser.add_argument('--custom-auth', metavar='string', help=auth_desc)
     parser.add_argument('--vectors', metavar='<file>', help=vect_desc)
     parser.add_argument('--sensitive', metavar='<file>', help=sens_desc)
@@ -65,18 +65,8 @@ def main():
         print("invalid command %s." % args.command)
         parser.print_help()
         exit()
-    if (args.command.lower() == "test"):
-        print("test not implemented yet")
-        exit()
 
-    if (args.slow == None): # If the argument was excluded, set default
-        timeout = .5 # 500ms is the default timeout for requests
-    else: # If the argument was set, parse timeout
-        try:
-            timeout = int(args.slow)/1000 # Convert from MS to seconds
-        except:
-            print("Invalid value for argument 'slow': %s", args.slow)
-            exit()
+    # Discover setup
 
     # Validate custom auth argument
     auth = ""
@@ -98,7 +88,26 @@ def main():
         for extension in extensions:
             guessed_urls.append(Url(url.url + '/' + word + '.' + extension))
 
-    crawl(url, guessed_urls, auth, timeout)
+    if (args.slow == None): # If the argument was excluded, set default
+        timeout = .5 # 500ms is the default timeout for requests
+    else: # If the argument was set, parse timeout
+        try:
+            timeout = int(args.slow)/1000 # Convert from MS to seconds
+        except:
+            print("Invalid value for argument 'slow': %s", args.slow)
+            exit()
+
+    # Test setup
+    test = False
+    if (args.command.lower() == "test"):
+        # Set up to do the testing version
+        test = True
+
+        # Set up the additional testing parts here (sensitive data leaked, lack of sanitization)
+        
+
+
+    crawl(url, guessed_urls, auth, test, timeout)
 
     return
 

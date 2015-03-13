@@ -33,13 +33,14 @@ class InputField:
 Represents a Page, including links, input fields, and URL.
 """
 class Page:
-    __slots__ = ('base_url', 'domain', 'params', 'input_fields', 'links', 'status_code')
+    __slots__ = ('base_url', 'domain', 'params', 'input_fields', 'links', 'status_code', 'test')
 
-    def __init__(self, url, req_timeout):
+    def __init__(self, url, test, req_timeout):
 
         self.params = set()
         self.input_fields = list()
         self.links = list()
+        self.test = test
 
         self.base_url = url.get_absolute()
         self.params.update(url.params)
@@ -125,10 +126,11 @@ class Page:
 Represents the set of Pages that are encountered in the crawl.
 """
 class PageSet:
-    __slots__ = ('pages', 'timeout')
+    __slots__ = ('pages', 'test', 'timeout')
 
-    def __init__(self, timeout):
+    def __init__(self, test, timeout):
         self.pages = list()
+        self.test = test
         self.timeout = timeout
 
     def __str__(self):
@@ -179,7 +181,7 @@ class PageSet:
     def create_or_update_page_by_url(self, url):
         page = self.get_page_by_url(url)
         if page is None:
-            new_page = Page(url, self.timeout)
+            new_page = Page(url, self.test, self.timeout)
             self.add_page(new_page)
             return new_page
         else:

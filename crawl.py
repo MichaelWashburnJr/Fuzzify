@@ -75,16 +75,17 @@ Params:
     url: the base Url to begin crawling from
     guessed_urls: a list of additional Urls to crawl from
     in_custom_auth: the custom authentication string to determine login
+    test: True when test is specified
     timeout: the Requests timeout, in seconds
 """
-def crawl(url, guessed_urls, in_custom_auth, timeout):
+def crawl(url, guessed_urls, in_custom_auth, test, timeout):
     global session
     global page_set
     global custom_auth
 
     custom_auth = in_custom_auth
 
-    page_set = PageSet(timeout)
+    page_set = PageSet(test, timeout)
     session = requests.Session()
 
     perform_auth()
