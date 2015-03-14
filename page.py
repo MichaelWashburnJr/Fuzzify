@@ -35,9 +35,10 @@ Represents a Page, including links, input fields, and URL.
 """
 class Page:
     __slots__ = ('base_url', 'domain', 'params', 'input_fields',
-                 'links', 'status_code', 'test', 'is_sanitary')
+                 'links', 'status_code', 'test', 'is_sanitary',
+                 'leaked_sensitive')
 
-    def __init__(self, url, test, req_timeout):
+    def __init__(self, url, test, req_timeout, sensitive):
 
         self.params = set()
         self.input_fields = list()
@@ -45,6 +46,7 @@ class Page:
         self.test = test
         self.status_code = -1 # Assume the page will time out. 
         self.is_sanitary = True
+        self.leaked_sensitive = False
 
         self.base_url = url.get_absolute()
         self.params.update(url.params)
@@ -87,18 +89,20 @@ class Page:
 
             if self.test:
                 # Do the additional test actions (sensitive data leaks)
+                for sensiword in sensitive:
+                    if (sensiword in r.text):
+                        self.leaked_sensitive = True
+                        print("Leaked sensitive data: {0}".format(sensiword))
             
                 # TODO: this would make a nice helper funtion that we could run
                 #       all responses through to check for data leaks
-                # for sensiword in sensitive_words:
-                #     if (sensiword in r.content):
-                #         print("You done goofed!")
-                pass
 
     def __str__(self):
         return_str = ""
 
         return_str += "URL: {0}\n".format(self.base_url)
+        if (self.leaked_sensitive):
+            return_str += "    LEAKED SENSITIVE DATA\n"
         if len(self.params) > 0:
             return_str += "    Variable(s) found:\n"
             for input_variable in self.params:
@@ -116,10 +120,10 @@ class Page:
         req_timeout: the Requests timeout, in seconds
         vectors: a list of inputs to try in forms
     """
-    def test_sanitization(self, req_timeout, vectors):
-        # Only try if there are inputs for this page
-        print("Testing: " + self.base_url)
+    def test_sanitization(self, req_timeout, vectors, sensitive):
         if len(self.input_fields) > 0:
+            # Only try if there are inputs for this page
+            print("Testing: " + self.base_url)
             for vector in vectors: # For each vector 
                 try:
 
@@ -142,6 +146,13 @@ class Page:
 
                         # Make the post request
                         r = crawl.session.post(self.base_url, data=payload)
+
+                        # Do the sensitive check again, just in case we caused a good error
+                        for sensiword in sensitive:
+                            if (sensiword in r.text):
+                                self.leaked_sensitive = True
+                                print("Leaked sensitive data: {0}".format(sensiword))
+
                         if vector in r.text:
                             print("  Code not sanitized: " + vector)
                             self.is_sanitary = False;
@@ -182,13 +193,14 @@ class Page:
 Represents the set of Pages that are encountered in the crawl.
 """
 class PageSet:
-    __slots__ = ('pages', 'test', 'timeout', 'vectors')
+    __slots__ = ('pages', 'test', 'timeout', 'vectors', 'sensitive')
 
-    def __init__(self, test, timeout, vectors):
+    def __init__(self, test, timeout, vectors, sensitive):
         self.pages = list()
         self.test = test
         self.timeout = timeout
         self.vectors = vectors
+        self.sensitive = sensitive
 
     def __str__(self):
         return_str = "\"OK\" Pages found:\n"
@@ -243,7 +255,7 @@ class PageSet:
     def test_sanitization(self):
         print("\nTesting Sanitization...\n")
         for page in self.pages:
-            page.test_sanitization(self.timeout, self.vectors)
+            page.test_sanitization(self.timeout, self.vectors, self.sensitive)
 
     """
     If a Page exists that matches the given URL, 
@@ -258,7 +270,7 @@ class PageSet:
     def create_or_update_page_by_url(self, url):
         page = self.get_page_by_url(url)
         if page is None:
-            new_page = Page(url, self.test, self.timeout)
+            new_page = Page(url, self.test, self.timeout, self.sensitive)
             self.add_page(new_page)
             return new_page
         else:

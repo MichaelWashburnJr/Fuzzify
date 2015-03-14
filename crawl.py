@@ -77,16 +77,17 @@ Params:
     in_custom_auth: the custom authentication string to determine login
     test: True when test is specified
     timeout: the Requests timeout, in seconds
-    vectors: used for test only. A list of inputs to try in forms.
+    vectors: used for test only. A list of inputs to try in forms
+    sensitive: used for test only. A list of data that should never be shown
 """
-def crawl(url, guessed_urls, in_custom_auth, test, timeout, vectors):
+def crawl(url, guessed_urls, in_custom_auth, test, timeout, vectors, sensitive):
     global session
     global page_set
     global custom_auth
 
     custom_auth = in_custom_auth
 
-    page_set = PageSet(test, timeout, vectors)
+    page_set = PageSet(test, timeout, vectors, sensitive)
     session = requests.Session()
 
     perform_auth()

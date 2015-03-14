@@ -41,7 +41,7 @@ def main():
     if (args.custom_auth and args.custom_auth.lower() in valid_custom_auth):
         auth = args.custom_auth.lower()
 
-    words = []
+    words = list()
     url = Url(args.url)
 
     if (args.common_words):
@@ -50,7 +50,7 @@ def main():
     extensions = load_lines_from_file("extensions.txt")
 
     # Build the page guessing Urls.
-    guessed_urls = []
+    guessed_urls = list()
     for word in words:
         for extension in extensions:
             guessed_urls.append(Url(url.url + '/' + word + '.' + extension))
@@ -66,7 +66,8 @@ def main():
 
     # Test setup
     test = False
-    vectors = []
+    vectors = list()
+    sensitive = list()
     if (args.command.lower() == "test"):
         # Set up to do the testing version
         test = True
@@ -75,8 +76,11 @@ def main():
         if args.vectors:
             vectors = load_lines_from_file(args.vectors)
 
+        if args.sensitive:
+            sensitive = load_lines_from_file(args.sensitive)
 
-    crawl(url, guessed_urls, auth, test, timeout, vectors)
+
+    crawl(url, guessed_urls, auth, test, timeout, vectors, sensitive)
 
     return
 
