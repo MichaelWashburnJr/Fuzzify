@@ -77,7 +77,7 @@ Params:
     in_custom_auth: the custom authentication string to determine login
     test: True when test is specified
     timeout: the Requests timeout, in seconds
-    vecors: used for test only. A list of inputs to try in forms.
+    vectors: used for test only. A list of inputs to try in forms.
 """
 def crawl(url, guessed_urls, in_custom_auth, test, timeout, vectors):
     global session

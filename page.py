@@ -88,7 +88,7 @@ class Page:
             if self.test:
                 # Do the additional test actions (sensitive data leaks)
             
-                #TODO: this would make a nice helper funtion that we could run
+                # TODO: this would make a nice helper funtion that we could run
                 #       all responses through to check for data leaks
                 # for sensiword in sensitive_words:
                 #     if (sensiword in r.content):
@@ -111,41 +111,44 @@ class Page:
         return return_str.rstrip() # Strip the last newline character.
 
     """
-    Test that the page sanitizes its inputs
+    Test that the page sanitizes its inputs.
+    Params:
+        req_timeout: the Requests timeout, in seconds
+        vectors: a list of inputs to try in forms
     """
     def test_sanitization(self, req_timeout, vectors):
-        #only try if there are inputs for this page
+        # Only try if there are inputs for this page
         print("Testing: " + self.base_url)
         if len(self.input_fields) > 0:
-            for vector in vectors: #for each vector 
+            for vector in vectors: # For each vector 
                 try:
 
-                    #if the vector has characters that should be escaped in it, test
+                    # If the vector has characters that should be escaped in it, test
                     if vector != html.escape(vector, quote=False):
                         #first reload the page
                         r = crawl.session.get(self.base_url, timeout=req_timeout)
 
-                        #gather inputs and values for the form
+                        # Gather inputs and values for the form
                         payload = dict()
                         beautiful = bs(r.content)
                         for input_field in beautiful.find_all('input'):                            
-                            #if the type is submit or it is hidden, dont use the vector
+                            # If the type is "submit" or "hidden," dont use the vector
                             value = vector
                             if "type" in input_field and input_field["type"] in ("submit", "hidden"):
                                 value = input_field["value"]
-                            #add the input to the payload
+                            # Add the input to the payload
                             if "name" in input_field:
                                 payload[input_field["name"]] = value
 
-                        #make the post request
+                        # Make the post request
                         r = crawl.session.post(self.base_url, data=payload)
                         if vector in r.text:
                             print("  Code not sanitized: " + vector)
                             self.is_sanitary = False;
-                            #no need to continue once we no this page isn't sanitary...
+                            # No need to continue once we no this page isn't sanitary...
                             break;
 
-                #catch the timeout exception only
+                # Catch the timeout exception only
                 except requests.exceptions.Timeout:
                     print("  Timeout exceeded.")
 
