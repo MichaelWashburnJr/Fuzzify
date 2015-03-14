@@ -36,7 +36,7 @@ Represents a Page, including links, input fields, and URL.
 class Page:
     __slots__ = ('base_url', 'domain', 'params', 'input_fields',
                  'links', 'status_code', 'test', 'is_sanitary',
-                 'leaked_sensitive')
+                 'sensitives_leaked')
 
     def __init__(self, url, test, req_timeout, sensitive):
 
@@ -46,7 +46,7 @@ class Page:
         self.test = test
         self.status_code = -1 # Assume the page will time out. 
         self.is_sanitary = True
-        self.leaked_sensitive = False
+        self.sensitives_leaked = list()
 
         self.base_url = url.get_absolute()
         self.params.update(url.params)
@@ -89,9 +89,10 @@ class Page:
 
             if self.test:
                 # Do the additional test actions (sensitive data leaks)
+                response_content_casefold = r.text.casefold()
                 for sensiword in sensitive:
-                    if (sensiword in r.text):
-                        self.leaked_sensitive = True
+                    if (sensiword.casefold() in response_content_casefold):
+                        self.sensitives_leaked.append(sensiword)
                         print("Leaked sensitive data: {0}".format(sensiword))
             
                 # TODO: this would make a nice helper funtion that we could run
@@ -101,12 +102,14 @@ class Page:
         return_str = ""
 
         return_str += "URL: {0}\n".format(self.base_url)
-        if (self.leaked_sensitive):
-            return_str += "    LEAKED SENSITIVE DATA\n"
+        if len(self.sensitives_leaked) > 0:
+            return_str += "    Sensitive Data Leaked:\n"
+            for leak in self.sensitives_leaked:
+                return_str += "      - \"{0}\"\n".format(str(leak))
         if len(self.params) > 0:
             return_str += "    Variable(s) found:\n"
             for input_variable in self.params:
-                return_str += "      - {0}\n".format(str(input_variable))
+                return_str += "      - \"{0}\"\n".format(str(input_variable))
         if len(self.input_fields) > 0:
             return_str += "    Input field(s) found:\n"
             for input_field in self.input_fields:
@@ -148,9 +151,10 @@ class Page:
                         r = crawl.session.post(self.base_url, data=payload)
 
                         # Do the sensitive check again, just in case we caused a good error
+                        response_content_casefold = r.text.casefold()
                         for sensiword in sensitive:
-                            if (sensiword in r.text):
-                                self.leaked_sensitive = True
+                            if (sensiword.casefold() in response_content_casefold):
+                                self.sensitives_leaked.append(sensiword)
                                 print("Leaked sensitive data: {0}".format(sensiword))
 
                         if vector in r.text:
