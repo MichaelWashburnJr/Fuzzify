@@ -131,7 +131,7 @@ class Page:
                         for input_field in beautiful.find_all('input'):                            
                             #if the type is submit or it is hidden, dont use the vector
                             value = vector
-                            if input_field["type"] in ("submit", "hidden"):
+                            if "type" in input_field and input_field["type"] in ("submit", "hidden"):
                                 value = input_field["value"]
                             #add the input to the payload
                             if "name" in input_field:
