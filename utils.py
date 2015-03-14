@@ -1,9 +1,10 @@
-from argparse import ArgumentParser
 """
 util.py
 
 Holds helper and general utility functions
 """
+
+from argparse import ArgumentParser
 
 global debug_flag
 debug_flag = False
