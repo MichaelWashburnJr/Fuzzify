@@ -201,7 +201,7 @@ class PageSet:
                 return_str += str(page) + '\n'
             elif page.status_code != 404:
                 not_ok_or_404_pages.append(page)
-            #build list of unsanitized pages
+            # Build list of unsanitized pages
             if not page.is_sanitary:
                 not_sanitary_pages.append(page)
 

@@ -24,7 +24,7 @@ Reads in each line from a text file and returns a list of all lines.
 Params:
     filename: path to the file to open
 Returns:
-    An list of lines found
+    A list of lines found
 """
 def load_lines_from_file(filename):
     lines = []
