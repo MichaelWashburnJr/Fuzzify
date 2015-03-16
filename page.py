@@ -36,11 +36,12 @@ Represents a Page, including links, input fields, and URL.
 class Page:
     __slots__ = ('base_url', 'domain', 'params', 'input_fields',
                  'links', 'status_code', 'test', 'is_sanitary',
-                 'sensitives_leaked')
+                 'sensitives_leaked', 'redirects')
 
     def __init__(self, url, test, req_timeout, sensitive):
 
         self.params = set()
+        self.redirects = set()
         self.input_fields = list()
         self.links = list()
         self.test = test
@@ -48,10 +49,9 @@ class Page:
         self.is_sanitary = True
         self.sensitives_leaked = list()
 
-        self.base_url = url.get_absolute()
+        self.base_url = url.get_absolute() # We may overwrite this later
         self.params.update(url.params)
         self.domain = url.domain
-
 
         r = None
         try:
@@ -65,11 +65,23 @@ class Page:
             crawl.perform_auth()
             try:
                 r = crawl.session.get(url.url, timeout=req_timeout)
+                if (r.status_code != 403):
+                    print("Successfully reauthenticated")
             except requests.exceptions.Timeout:
                 print("  Timeout exceeded.")
 
         # If the request is valid and not timed out 
         if r != None:
+            # Convert the final URL to a URL object and use it's absolute URL
+            u = Url(r.url)
+            self.base_url = u.get_absolute();
+            # If there are redirects, keep track.
+            for req in r.history:
+                redirect_url = Url(req.url)
+                # Check that this URL is not the same as the URL that got us here.
+                if self.base_url != redirect_url.get_absolute():
+                    self.redirects.add(redirect_url)
+
             self.status_code = r.status_code
             #self.base_url = Url(r.url).get_absolute()
 
@@ -293,6 +305,9 @@ class PageSet:
         for page in self.pages:
             if page.matches_url(url):
                 return page
+            for redir in page.redirects:
+                if (redir == url):
+                    return page
         return None
 
     """

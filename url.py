@@ -5,6 +5,7 @@ Abstracts URL parsing logic
 """
 
 from utils import debug
+from urllib.parse import quote
 
 class Url():
     __slots__ = ('domain', 'url', 'params')
@@ -48,8 +49,6 @@ class Url():
         debug("Iterating through parts")
         # Go through all the parts and build up a canonical URL
         for part in parts:
-            if (part == ""): # Ignore multiple slashes
-                continue
             debug("Found part: %s" % part)
 
             if ('?' in part): # Query parameter case
@@ -58,7 +57,9 @@ class Url():
                 part = part.split("?")[0]
 
             # Not elif, because we want to just ignore the part after the '?'
-            if (part == ".."): # Need to remove the previous part
+            if (part == ""): # Ignore multiple slashes
+                continue
+            elif (part == ".."): # Need to remove the previous part
                 if (len(canonical_parts) is not 0):
                     debug("Found '..', removing %s" % canonical_parts.pop())
 
