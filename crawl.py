@@ -99,7 +99,8 @@ def crawl(url, guessed_urls, in_custom_auth, test, timeout, vectors, sensitive):
         recurse_crawl(url_to_test)
     
     #do sanitization checks
-    page_set.test_sanitization();
+    if test:
+        page_set.test_sanitization();
     
     print("\n\n\n{:=^76}\n".format(" OUTPUT "))
 
