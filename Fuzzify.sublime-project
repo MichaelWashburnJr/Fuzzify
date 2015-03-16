@@ -19,6 +19,9 @@
         "name": "discover bodgeit",
         "cmd": ["python", "fuzz.py", "discover", "http://127.0.0.1:8080/bodgeit/", "--common-words", "words.txt", "--custom-auth", "bodgeit"]
     }, {
+        "name": "discover dvwa",
+        "cmd": ["python", "fuzz.py", "discover", "http://127.0.0.1/dvwa/", "--common-words", "words.txt", "--custom-auth", "dvwa", "--slow", "1000"]
+    }, {
         "name": "test bodgeit",
         "cmd": ["python", "fuzz.py", "test", "http://127.0.0.1:8080/bodgeit/", "--common-words", "words.txt", "--custom-auth", "bodgeit", "--vectors", "vectors.txt", "--sensitive", "sensitive.txt"]
     }, {
