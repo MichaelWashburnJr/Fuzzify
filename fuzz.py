@@ -1,6 +1,12 @@
 """
 fuzz.py
 
+By:
+Adam McCarthy,
+Corban Mailloux, 
+Michael Washburn, Jr.
+
+
 SWEN-331 Fuzzer Project.
 See the included README.md file.
 
