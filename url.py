@@ -11,6 +11,7 @@ class Url():
     __slots__ = ('domain', 'url', 'params')
 
     def __init__(self, url, source="", domain=""):
+        slash = ends_with_slash(url) # We need to keep it consistent.
         url = remove_after_last(url, '#')
         # We can ignore empty URLs, or URLs that start with mailto: or javascript:
         if (url == "" or url.startswith("mailto:") or url.startswith("javascript:")):
@@ -74,6 +75,8 @@ class Url():
         final_url = "http://" + self.domain
         for p in canonical_parts:
             final_url += "/" + p
+        if slash:
+            final_url += "/"
         debug("Final URL: %s" % final_url)
         self.url = final_url
 
@@ -115,6 +118,17 @@ Returns:
 """
 def is_absolute(url):
     return "://" in url
+
+def ends_with_slash(url):
+    prev_is_slash = False
+    for ch in url:
+        if (ch == '/'):
+            prev_is_slash = True
+        else:
+            prev_is_slash = False
+        if (ch in '#?'):
+            break
+    return prev_is_slash
 
 """
 Does some black magic python to remove all characters after and including
