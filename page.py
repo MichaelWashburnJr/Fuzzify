@@ -106,9 +106,6 @@ class Page:
                     if (sensiword.casefold() in response_content_casefold):
                         self.sensitives_leaked.append(sensiword)
                         print("Leaked sensitive data: {0}".format(sensiword))
-            
-                # TODO: this would make a nice helper funtion that we could run
-                #       all responses through to check for data leaks
 
     def __str__(self):
         return_str = ""
@@ -134,6 +131,7 @@ class Page:
     Params:
         req_timeout: the Requests timeout, in seconds
         vectors: a list of inputs to try in forms
+        sensitive: a list of sensitive data
     """
     def test_sanitization(self, req_timeout, vectors, sensitive):
         if len(self.input_fields) > 0:

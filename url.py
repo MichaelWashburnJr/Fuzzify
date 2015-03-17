@@ -119,6 +119,13 @@ Returns:
 def is_absolute(url):
     return "://" in url
 
+"""
+Determine if a url ends with a slash
+Params:
+    url: The url to check
+Returns:
+    true if the URL ends with a slash, false otherwise
+"""
 def ends_with_slash(url):
     prev_is_slash = False
     for ch in url:
